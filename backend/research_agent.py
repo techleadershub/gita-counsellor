@@ -21,9 +21,10 @@ class AgentState(TypedDict):
 
 # --- Research Agent ---
 class ResearchAgent:
-    def __init__(self, vector_store: VectorStore, log_callback=None):
+    def __init__(self, vector_store: VectorStore, log_callback=None, progress_callback=None):
         self.vector_store = vector_store
         self.log_callback = log_callback
+        self.progress_callback = progress_callback
         
         # Setup LLM
         provider = LLM_CONFIG.get("provider", "openai")
@@ -41,6 +42,15 @@ class ResearchAgent:
     def log(self, message: str):
         if self.log_callback:
             self.log_callback(message)
+    
+    def emit_progress(self, step: str, message: str, details: dict = None):
+        """Emit progress update for frontend visualization."""
+        if self.progress_callback:
+            self.progress_callback({
+                "step": step,
+                "message": message,
+                "details": details or {}
+            })
 
     # --- Nodes ---
     
@@ -48,6 +58,7 @@ class ResearchAgent:
         """Analyze the user's problem and extract key aspects."""
         query = state["user_query"]
         self.log(f"Analyzing problem: '{query}'...")
+        self.emit_progress("analyzing", "Analyzing your question and identifying key themes...", {"query": query})
         
         prompt = f"""You are an expert counselor analyzing a modern person's problem or question, providing guidance for diverse seekers including students, professionals, individuals, families, and corporate employees. Use universal, inclusive language that appeals to people of all backgrounds.
 
@@ -87,6 +98,7 @@ Make questions specific and focused. Return ONLY the questions, one per line, no
         questions = [q.strip() for q in research_response.content.split("\n") if q.strip() and not q.strip().startswith("#")]
         
         self.log(f"Generated {len(questions)} research questions")
+        self.emit_progress("questions_generated", f"Generated {len(questions)} research questions to explore", {"count": len(questions), "questions": questions})
         return {
             "problem_context": analysis,
             "research_questions": questions
@@ -98,9 +110,11 @@ Make questions specific and focused. Return ONLY the questions, one per line, no
         all_verses = []
         
         self.log(f"Researching {len(questions)} questions...")
+        self.emit_progress("researching", f"Searching through {len(questions)} research questions in the Bhagavad Gita...", {"total": len(questions), "current": 0})
         
         for i, question in enumerate(questions, 1):
             self.log(f"  [{i}/{len(questions)}] Searching: {question}")
+            self.emit_progress("searching_verse", f"Searching: {question[:60]}...", {"current": i, "total": len(questions), "question": question})
             
             # Search vector store
             results = self.vector_store.search(question, limit=5)
@@ -133,6 +147,7 @@ Make questions specific and focused. Return ONLY the questions, one per line, no
                 unique_verses.append(verse)
         
         self.log(f"Total {len(unique_verses)} unique verses found (from {len(all_verses)} results)")
+        self.emit_progress("verses_found", f"Found {len(unique_verses)} relevant verses from the Bhagavad Gita", {"count": len(unique_verses)})
         return {"relevant_verses": unique_verses}
 
     def synthesize_guidance_node(self, state: AgentState):
@@ -142,6 +157,7 @@ Make questions specific and focused. Return ONLY the questions, one per line, no
         verses = state["relevant_verses"]
         
         self.log("Synthesizing comprehensive guidance...")
+        self.emit_progress("synthesizing", "Synthesizing comprehensive guidance from the verses...", {"verse_count": len(verses)})
         
         # Format verses for context - INCLUDE FULL CONTENT (no truncation)
         verses_text = []
@@ -372,6 +388,7 @@ REMEMBER: Your response must be grounded in the verses provided above. Do not ad
         verses = state["relevant_verses"]
         
         self.log("Finalizing comprehensive answer...")
+        self.emit_progress("finalizing", "Finalizing answer format...", {})
         
         # Get unique verse references
         verse_refs = list(set([v["verse_id"] for v in verses[:10]]))

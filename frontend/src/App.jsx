@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { research } from './api';
+import ResearchProgress from './components/ResearchProgress';
 
 function App() {
 
@@ -30,6 +31,8 @@ function ResearchView() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('answer');
+  const [showProgress, setShowProgress] = useState(false);
+  const [currentQuery, setCurrentQuery] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,17 +41,24 @@ function ResearchView() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setShowProgress(true);
+    setCurrentQuery(query);
+    
+    // The ResearchProgress component will handle the streaming and call onComplete/onError
+    // We don't need to call research() here when using streaming
+  };
 
-    try {
-      const data = await research(query, context || null);
-      setResult(data);
-      setActiveTab('answer');
-    } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Failed to get research results');
-      console.error('Research error:', err);
-    } finally {
-      setLoading(false);
-    }
+  const handleProgressComplete = (data) => {
+    setResult(data);
+    setActiveTab('answer');
+    setShowProgress(false);
+    setLoading(false);
+  };
+
+  const handleProgressError = (err) => {
+    setError(err.message || 'Research failed');
+    setShowProgress(false);
+    setLoading(false);
   };
 
   return (
@@ -96,6 +106,15 @@ function ResearchView() {
           </button>
         </form>
       </div>
+
+      {showProgress && (
+        <ResearchProgress
+          query={currentQuery}
+          context={context}
+          onComplete={handleProgressComplete}
+          onError={handleProgressError}
+        />
+      )}
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">

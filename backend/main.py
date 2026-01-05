@@ -1,9 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, List, Dict
 import os
 import logging
+import json
+import asyncio
 from vector_store import VectorStore
 from research_agent import ResearchAgent
 from ingestion import IngestionService
@@ -61,6 +64,113 @@ async def root():
 async def health():
     return {"status": "healthy"}
 
+# Progress queue for SSE - using thread-safe queue
+import queue as thread_queue
+
+async def research_with_progress(request: ResearchRequest):
+    """Research with progress streaming via SSE."""
+    progress_queue = thread_queue.Queue()
+    
+    def progress_callback(progress_data):
+        """Callback to emit progress updates (called from sync context)."""
+        progress_queue.put(progress_data)
+    
+    async def run_research():
+        try:
+            vs = get_vector_store()
+            agent = ResearchAgent(vs, log_callback=log_callback, progress_callback=progress_callback)
+            graph = agent.build_graph()
+            
+            initial_state = {
+                "user_query": request.query,
+                "problem_context": request.context or "",
+                "research_questions": [],
+                "relevant_verses": [],
+                "analysis": "",
+                "guidance": "",
+                "exercises": "",
+                "final_answer": ""
+            }
+            
+            # Run research in background thread
+            result = await asyncio.to_thread(graph.invoke, initial_state)
+            
+            # Send final result
+            progress_queue.put({
+                "step": "completed",
+                "message": "Research complete!",
+                "details": {
+                    "answer": result["final_answer"],
+                    "analysis": result["analysis"],
+                    "guidance": result["guidance"],
+                    "exercises": result["exercises"],
+                    "verses": result["relevant_verses"][:10],
+                    "query": request.query
+                }
+            })
+        except Exception as e:
+            logging.error(f"Research error: {e}", exc_info=True)
+            progress_queue.put({
+                "step": "error",
+                "message": str(e),
+                "details": {}
+            })
+    
+    # Start research in background
+    research_task = asyncio.create_task(run_research())
+    
+    async def event_generator():
+        try:
+            while True:
+                # Check if research task is done (client might have disconnected)
+                if research_task.done():
+                    # If task completed but queue is empty, something went wrong
+                    if progress_queue.empty():
+                        try:
+                            # Check if there was an exception
+                            research_task.result()
+                        except Exception as e:
+                            yield f"data: {json.dumps({'step': 'error', 'message': str(e), 'details': {}})}\n\n"
+                        break
+                
+                try:
+                    # Check queue with timeout
+                    try:
+                        progress_data = progress_queue.get(timeout=0.5)
+                    except thread_queue.Empty:
+                        # Send heartbeat to keep connection alive
+                        yield f": heartbeat\n\n"
+                        continue
+                    
+                    if progress_data["step"] == "completed":
+                        yield f"data: {json.dumps(progress_data)}\n\n"
+                        break
+                    elif progress_data["step"] == "error":
+                        yield f"data: {json.dumps(progress_data)}\n\n"
+                        break
+                    else:
+                        yield f"data: {json.dumps(progress_data)}\n\n"
+                except Exception as e:
+                    logging.error(f"Event generator error: {e}", exc_info=True)
+                    yield f"data: {json.dumps({'step': 'error', 'message': str(e), 'details': {}})}\n\n"
+                    break
+        except asyncio.CancelledError:
+            # Client disconnected - cancel the research task if possible
+            logging.info("Client disconnected, cancelling research task")
+            if not research_task.done():
+                research_task.cancel()
+            raise
+    
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
+
 @app.post("/api/research")
 async def research(request: ResearchRequest):
     """Main research endpoint - provides comprehensive guidance."""
@@ -93,6 +203,11 @@ async def research(request: ResearchRequest):
     except Exception as e:
         logging.error(f"Research error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/research/stream")
+async def research_stream(request: ResearchRequest):
+    """Research endpoint with SSE streaming for progress updates."""
+    return await research_with_progress(request)
 
 @app.get("/api/verses")
 async def get_verses(chapter: Optional[int] = None, verse_number: Optional[int] = None, verse_id: Optional[str] = None):
