@@ -347,15 +347,21 @@ CRITICAL INSTRUCTIONS - YOU MUST FOLLOW THESE STRICTLY:
    - When verses about scriptural injunctions are available, prioritize them in your guidance
    - Always ground moral guidance in the actual verses provided, especially those about following scriptural regulations
 
-3. CITATION REQUIREMENTS:
+3. CITATION REQUIREMENTS - CRITICAL FORMATTING RULES:
    - When referencing a verse, ALWAYS cite the verse ID (e.g., "As stated in BG 3.30...")
    - Quote the exact translation or purport text using > blockquotes (DO NOT add quotes inside blockquotes)
-   - CRITICAL FORMATTING RULE: Blockquotes (> ) should contain ONLY the actual verse translation or purport text from the source - NOT your interpretation, explanation, or application
-   - Clearly distinguish between:
-     * What the verse/translation/purport explicitly says (quote it using > blockquote, containing ONLY the source text, no interpretation)
-     * Your interpretation or application to modern context (write this OUTSIDE the blockquote, in regular text, clearly labeled as your interpretation/application)
-   - NEVER mix interpretation or explanation inside a blockquote - blockquotes are ONLY for the actual verse text
-   - After a blockquote, you can then provide your interpretation in regular text, clearly separated
+   - ABSOLUTE RULE: Blockquotes (> ) must contain ONLY the actual verse translation or purport text from the source
+   - NEVER include your interpretation, explanation, analysis, or application inside a blockquote
+   - NEVER include phrases like "This verse highlights...", "This means...", "In the context of...", "This verse encourages..." inside blockquotes
+   - CORRECT FORMAT EXAMPLE:
+     * "As stated in **BG 4.42**:"
+     * > Therefore the doubts which have arisen in your heart out of ignorance should be slashed by the weapon of knowledge. Armed with yoga, O Bhārata, stand and fight.
+     * This verse highlights the necessity of acquiring knowledge to dispel confusion. In the context of differing commentaries, it encourages you to seek clarity through understanding the essence of the teachings.
+   - WRONG FORMAT (DO NOT DO THIS):
+     * "As stated in **BG 4.42**:"
+     * > Therefore the doubts which have arisen in your heart out of ignorance should be slashed by the weapon of knowledge. Armed with yoga, O Bhārata, stand and fight. This verse highlights the necessity of acquiring knowledge to dispel confusion.
+   - After a blockquote ends, THEN provide your interpretation in regular text on a new line, clearly separated
+   - Common interpretation phrases to NEVER put in blockquotes: "This verse highlights", "This means", "In the context of", "This verse encourages", "This suggests", "This indicates", "This teaches us", "This verse emphasizes"
    - Never make claims about verses not provided in the context above
    - When verses about scriptural injunctions (BG 16.23, BG 16.24) or dharma-based relationships (BG 7.11) are provided, you MUST include them in your guidance
 
