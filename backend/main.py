@@ -74,15 +74,19 @@ async def research_with_progress(request: ResearchRequest):
     def progress_callback(progress_data):
         """Callback to emit progress updates (called from sync context)."""
         try:
+            step = progress_data.get("step", "unknown")
+            message = progress_data.get("message", "")[:50]  # Truncate for logging
+            logging.info(f"Progress callback: step={step}, message={message}")
             # Queue.put() is blocking but unbounded queue won't block
             # Add timeout to prevent indefinite blocking (defensive)
             progress_queue.put(progress_data, block=True, timeout=5.0)
+            logging.info(f"Progress data queued successfully: step={step}")
         except thread_queue.Full:
             # Queue is full (shouldn't happen with unbounded queue, but be safe)
             logging.warning("Progress queue full, dropping progress update")
         except Exception as e:
             # Don't let progress callback errors crash the research
-            logging.error(f"Error putting progress data in queue: {e}")
+            logging.error(f"Error putting progress data in queue: {e}", exc_info=True)
     
     async def run_research():
         try:
@@ -143,10 +147,10 @@ async def research_with_progress(request: ResearchRequest):
             
             while True:
                 try:
-                    # Check queue with timeout first (before checking task status)
-                    # This ensures we read "completed" message even if task is done
+                    # Check queue non-blocking to avoid blocking event loop
+                    # Poll the queue instead of using blocking get()
                     try:
-                        progress_data = progress_queue.get(timeout=0.5)
+                        progress_data = progress_queue.get_nowait()
                     except thread_queue.Empty:
                         # Queue is empty, check if task is done
                         if research_task.done():
@@ -162,9 +166,13 @@ async def research_with_progress(request: ResearchRequest):
                         else:
                             # Send heartbeat to keep connection alive
                             yield f": heartbeat\n\n"
+                        # Sleep briefly before checking queue again (non-blocking)
+                        await asyncio.sleep(0.1)
                         continue
                     
                     # Process the progress data
+                    step = progress_data.get("step", "unknown")
+                    logging.info(f"Event generator: Processing progress data, step={step}")
                     try:
                         # Ensure progress_data is serializable
                         serialized_data = {
@@ -173,8 +181,9 @@ async def research_with_progress(request: ResearchRequest):
                             "details": progress_data.get("details", {})
                         }
                         json_str = json.dumps(serialized_data)
+                        logging.info(f"Event generator: Serialized data, yielding SSE event for step={step}")
                     except (TypeError, ValueError) as e:
-                        logging.error(f"Error serializing progress data: {e}")
+                        logging.error(f"Error serializing progress data: {e}", exc_info=True)
                         # Send a safe error message
                         json_str = json.dumps({
                             "step": "error",
@@ -183,12 +192,15 @@ async def research_with_progress(request: ResearchRequest):
                         })
                     
                     if progress_data["step"] == "completed":
+                        logging.info("Event generator: Sending completed message and breaking")
                         yield f"data: {json_str}\n\n"
                         break
                     elif progress_data["step"] == "error":
+                        logging.info("Event generator: Sending error message and breaking")
                         yield f"data: {json_str}\n\n"
                         break
                     else:
+                        logging.info(f"Event generator: Yielding progress update for step={step}")
                         yield f"data: {json_str}\n\n"
                 except Exception as e:
                     logging.error(f"Event generator error: {e}", exc_info=True)
