@@ -50,6 +50,13 @@ export default function ResearchProgress({ query, context, onComplete, onError }
     let isActive = true;
     isCompleteRef.current = false;
     
+    // Diagnostic logging
+    console.log('🔍 ResearchProgress: Starting stream request');
+    console.log('🔍 API_URL:', API_URL);
+    console.log('🔍 Full URL:', `${API_URL}/api/research/stream`);
+    console.log('🔍 Query:', query);
+    console.log('🔍 Context:', context);
+    
     // Use fetch with streaming for SSE (since EventSource doesn't support POST)
     fetch(`${API_URL}/api/research/stream`, {
       method: 'POST',
@@ -60,13 +67,24 @@ export default function ResearchProgress({ query, context, onComplete, onError }
       signal: controller.signal
     })
       .then(response => {
+        console.log('✅ ResearchProgress: Response received', {
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers.entries()),
+          hasBody: !!response.body
+        });
+        
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          console.error('❌ ResearchProgress: HTTP error', response.status, response.statusText);
+          throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
         }
         
         if (!response.body) {
+          console.error('❌ ResearchProgress: Response body is null');
           throw new Error('Response body is null - streaming not supported');
         }
+        
+        console.log('✅ ResearchProgress: Starting to read stream');
         
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -110,27 +128,36 @@ export default function ResearchProgress({ query, context, onComplete, onError }
               if (line.startsWith('data: ')) {
                 try {
                   const data = JSON.parse(line.slice(6));
+                  console.log('📨 ResearchProgress: Received progress data', data);
                   // Validate required fields
                   if (data && typeof data === 'object' && 'step' in data) {
                     handleProgress(data);
                   } else {
-                    console.warn('Invalid progress data format:', data);
+                    console.warn('⚠️ ResearchProgress: Invalid progress data format:', data);
                   }
                 } catch (e) {
-                  console.error('Error parsing SSE data:', e, line);
+                  console.error('❌ ResearchProgress: Error parsing SSE data:', e, line);
                   // Continue processing other lines
                 }
+              } else if (line.startsWith(':')) {
+                console.log('💓 ResearchProgress: Heartbeat received');
               }
             }
 
             readStream();
           }).catch(err => {
             if (err.name !== 'AbortError' && isActive) {
-              console.error('Stream error:', err);
+              console.error('❌ ResearchProgress: Stream read error:', {
+                name: err.name,
+                message: err.message,
+                stack: err.stack
+              });
               isActive = false;
               isCompleteRef.current = true;
               setIsComplete(true);
               onErrorRef.current?.(err);
+            } else if (err.name === 'AbortError') {
+              console.log('ℹ️ ResearchProgress: Stream read aborted (expected on cleanup)');
             }
           });
         }
@@ -139,12 +166,20 @@ export default function ResearchProgress({ query, context, onComplete, onError }
       })
       .catch(err => {
         if (err.name !== 'AbortError' && isActive) {
-          console.error('Fetch error:', err);
+          console.error('❌ ResearchProgress: Fetch error:', {
+            name: err.name,
+            message: err.message,
+            stack: err.stack,
+            API_URL: API_URL,
+            fullURL: `${API_URL}/api/research/stream`
+          });
           isActive = false;
           isCompleteRef.current = true;
           setIsComplete(true);
           const errorMessage = err.message || 'Failed to connect to server. Please check if the backend is running.';
           onErrorRef.current?.(new Error(errorMessage));
+        } else if (err.name === 'AbortError') {
+          console.log('ℹ️ ResearchProgress: Request aborted (expected on cleanup)');
         }
       });
 
