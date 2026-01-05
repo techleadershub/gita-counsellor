@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
-        name: 'Bhagavad Gita Research Agent',
-        short_name: 'Gita Research',
+        name: 'Gita Counsellor',
+        short_name: 'Gita Counsellor',
         description: 'Get guidance from Bhagavad Gita for modern problems',
         theme_color: '#f59e0b',
         background_color: '#ffffff',
