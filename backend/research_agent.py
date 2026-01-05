@@ -178,9 +178,9 @@ CRITICAL INSTRUCTIONS - YOU MUST FOLLOW THESE STRICTLY:
 
 2. CITATION REQUIREMENTS:
    - When referencing a verse, ALWAYS cite the verse ID (e.g., "As stated in BG 3.30...")
-   - Quote the exact translation or purport text in quotes when making specific claims
+   - Quote the exact translation or purport text using > blockquotes (DO NOT add quotes inside blockquotes)
    - Clearly distinguish between:
-     * What the verse/translation/purport explicitly says (quote it)
+     * What the verse/translation/purport explicitly says (quote it using > blockquote, no quotes inside)
      * Your interpretation or application to modern context (label it as such)
    - Never make claims about verses not provided in the context above
 
@@ -190,7 +190,7 @@ CRITICAL INSTRUCTIONS - YOU MUST FOLLOW THESE STRICTLY:
    A. ANALYSIS (500+ words):
       - Use clear section headers with ## for main topics and ### for subtopics
       - Explain how the PROVIDED verses address this specific problem
-      - Quote specific translations and purports from the verses above using > blockquotes
+      - Quote specific translations and purports from the verses above using > blockquotes (text only, no quotes inside)
       - Reference specific verses by ID (e.g., **BG 2.12**, **BG 3.30**) in bold and explain their relevance
       - Explain the core principles as described in the purports
       - Connect the verse teachings to modern context (mention Gen Z/Gen Alpha challenges if relevant)
@@ -231,13 +231,13 @@ CRITICAL INSTRUCTIONS - YOU MUST FOLLOW THESE STRICTLY:
      * ## for main section headers
      * ### for subsection headers
      * **bold** for emphasis and verse IDs
-     * > blockquotes for verse translations
+     * > blockquotes for verse translations (NO quotes inside blockquotes - just the text)
      * - bullet points for lists
      * 1. numbered lists for steps
    - Add spacing (blank lines) between paragraphs and sections
    - Be comprehensive - each section should be substantial (500+ words)
    - Reference specific verses throughout with citations in **bold**
-   - Quote actual verse content when making specific claims using > blockquotes
+   - Quote actual verse content when making specific claims using > blockquotes (text only, no quotes)
    - Use clear structure with headers, bullet points, and numbered lists
    - Be inspiring and encouraging
    - Make it visually appealing and easy to read
@@ -246,6 +246,17 @@ REMEMBER: Your response must be grounded in the verses provided above. Do not ad
         
         response = self.llm.invoke([SystemMessage(content=prompt)])
         guidance = response.content
+        
+        # Clean up double quotes from blockquotes
+        # Remove quotes that appear inside blockquote lines
+        # Pattern: > "text" (quotes at start/end of blockquote line)
+        guidance = re.sub(r'^>\s*"([^"]+)"\s*$', r'> \1', guidance, flags=re.MULTILINE)
+        # Pattern: > "text" (quotes after >)
+        guidance = re.sub(r'^>\s*"([^"]+)"', r'> \1', guidance, flags=re.MULTILINE)
+        # Pattern: > text "quoted" text (quotes in middle)
+        guidance = re.sub(r'^>([^"]*)"([^"]+)"([^"]*)$', r'>\1\2\3', guidance, flags=re.MULTILINE)
+        # Pattern: > "text" (with trailing content)
+        guidance = re.sub(r'^>\s*"([^"]+)"\s+', r'> \1 ', guidance, flags=re.MULTILINE)
         
         # Parse into sections - improved parsing logic
         sections = {
