@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Premium typography for markdown content */
+.prose {
+  @apply text-gray-800;
+}
+
+.prose h1 {
+  @apply text-3xl font-bold text-saffron-700 mb-6 mt-8;
+}
+
+.prose h2 {
+  @apply text-2xl font-bold text-saffron-700 mb-4 mt-8 border-b border-saffron-200 pb-2;
+}
+
+.prose h3 {
+  @apply text-xl font-semibold text-saffron-600 mb-3 mt-6;
+}
+
+.prose p {
+  @apply mb-4 leading-relaxed text-gray-700;
+}
+
+.prose strong {
+  @apply font-semibold text-saffron-600;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-saffron-400 pl-4 italic text-gray-700 my-4 bg-saffron-50 py-2 rounded-r;
+}
+
+.prose ul, .prose ol {
+  @apply mb-4 pl-6;
+}
+
+.prose ul {
+  @apply list-disc;
+}
+
+.prose ol {
+  @apply list-decimal;
+}
+
+.prose li {
+  @apply mb-2 leading-relaxed;
+}
+
+.prose hr {
+  @apply my-8 border-t-2 border-saffron-200;
+}
+
+.prose a {
+  @apply text-saffron-600 hover:text-saffron-700 underline;
+}
+
+/* Premium verse display styling */
+.prose h4 {
+  @apply text-lg font-semibold text-saffron-700 mb-3 mt-6;
+}
+
+/* Style div elements in markdown (for footer/attribution) */
+.prose div {
+  @apply my-4;
+}
+
+.prose div[style*="text-align: center"] {
+  @apply text-center text-gray-600 italic mt-8 pt-4 border-t border-gray-200;
+}
+
+/* Better spacing for nested lists */
+.prose ul ul, .prose ol ol, .prose ul ol, .prose ol ul {
+  @apply mt-2 mb-2;
+}
+
+/* Code blocks */
+.prose code {
+  @apply bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono;
+}
+
+.prose pre {
+  @apply bg-gray-100 p-4 rounded-lg overflow-x-auto my-4;
+}
+
+.prose pre code {
+  @apply bg-transparent p-0;
+}
+
+/* Transliteration styling (italic text for romanized Sanskrit) */
+.prose em {
+  @apply text-gray-700 italic;
+  font-style: italic;
+}
+
+/* Code blocks (if still used elsewhere) */
+.prose pre {
+  @apply bg-saffron-50 border border-saffron-200;
+}
+
+.prose pre code {
+  @apply font-serif text-base text-gray-800 bg-transparent;
+  font-family: 'Noto Sans Devanagari', 'Arial Unicode MS', sans-serif;
+}
+
+/* Ensure blockquotes don't break awkwardly - single continuous block */
+.prose blockquote {
+  @apply whitespace-normal break-words;
+}
+
+.prose blockquote p {
+  @apply mb-0 inline;
+}
+
+.prose blockquote p:not(:last-child)::after {
+  content: " ";
+}
+
+/* Table styling if needed */
+.prose table {
+  @apply w-full border-collapse my-4;
+}
+
+.prose th, .prose td {
+  @apply border border-gray-300 px-4 py-2;
+}
+
+.prose th {
+  @apply bg-saffron-50 font-semibold text-saffron-700;
+}
+

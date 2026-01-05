@@ -1,0 +1,12 @@
+app:
+  title: Bhagavad Gita Research Agent
+  version: 1.0.0
+llm:
+  model: gpt-4o-mini
+  openai_key: ""         # Set via Environment Variable in Production
+  openrouter_key: ""     # Set via Environment Variable in Production
+  provider: openai
+vector_db:
+  collection_name: bhagavad_gita_verses
+  path: ./data/qdrant_db
+

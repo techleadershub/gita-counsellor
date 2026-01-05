@@ -1,0 +1,136 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+*.env
+secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+
+# API Keys and Secrets (extra safety)
+*api*key*.txt
+*secret*.txt
+*credential*.txt
+credentials.json
+secrets.json
+
+# Config files with sensitive data (keep example)
+config.yaml
+!config.example.yaml
+*.local.yaml
+*.local.yml
+
+# Data and databases
+data/
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+qdrant_data/
+*.qdrant
+
+# Logs
+*.log
+logs/
+*.log.*
+ingestion.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+.npm
+.eslintcache
+.pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Railway
+.railway/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*~
+
+# Python cache
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Coverage reports
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
