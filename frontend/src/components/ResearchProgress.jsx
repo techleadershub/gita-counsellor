@@ -64,6 +64,10 @@ export default function ResearchProgress({ query, context, onComplete, onError }
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
+        if (!response.body) {
+          throw new Error('Response body is null - streaming not supported');
+        }
+        
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
@@ -77,6 +81,12 @@ export default function ResearchProgress({ query, context, onComplete, onError }
               if (!isCompleteRef.current) {
                 onErrorRef.current?.(new Error('Stream ended unexpectedly'));
               }
+              return;
+            }
+            
+            if (!value) {
+              // Empty chunk, continue reading
+              readStream();
               return;
             }
 
@@ -133,7 +143,8 @@ export default function ResearchProgress({ query, context, onComplete, onError }
           isActive = false;
           isCompleteRef.current = true;
           setIsComplete(true);
-          onErrorRef.current?.(err);
+          const errorMessage = err.message || 'Failed to connect to server. Please check if the backend is running.';
+          onErrorRef.current?.(new Error(errorMessage));
         }
       });
 

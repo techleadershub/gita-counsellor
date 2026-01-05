@@ -130,6 +130,17 @@ async def research_with_progress(request: ResearchRequest):
     
     async def event_generator():
         try:
+            # Send initial connection message immediately to confirm stream is working
+            initial_message = {
+                "step": "analyzing",
+                "message": "Connection established. Starting research...",
+                "details": {}
+            }
+            yield f"data: {json.dumps(initial_message)}\n\n"
+            
+            # Small delay to ensure first message is sent
+            await asyncio.sleep(0.1)
+            
             while True:
                 try:
                     # Check queue with timeout first (before checking task status)
@@ -147,6 +158,7 @@ async def research_with_progress(request: ResearchRequest):
                                 yield f"data: {json.dumps({'step': 'error', 'message': 'Research completed unexpectedly', 'details': {}})}\n\n"
                             except Exception as e:
                                 yield f"data: {json.dumps({'step': 'error', 'message': str(e), 'details': {}})}\n\n"
+                            break
                         else:
                             # Send heartbeat to keep connection alive
                             yield f": heartbeat\n\n"
