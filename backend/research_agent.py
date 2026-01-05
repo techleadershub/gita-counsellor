@@ -512,17 +512,14 @@ REMEMBER: Your response must be grounded in the verses provided above. Do not ad
             if any(keyword in line_upper for keyword in ["A. ANALYSIS", "## ANALYSIS", "# ANALYSIS", "ANALYSIS"]):
                 if "ANALYSIS" in line_upper and ("A." in line_upper or "##" in line or "#" in line):
                     current_section = "analysis"
-                    sections["analysis"] = line + "\n"
                     continue
             elif any(keyword in line_upper for keyword in ["B. PRACTICAL GUIDANCE", "B. GUIDANCE", "## PRACTICAL GUIDANCE", "## GUIDANCE", "PRACTICAL GUIDANCE"]):
                 if ("GUIDANCE" in line_upper or "PRACTICAL" in line_upper) and ("B." in line_upper or "##" in line or "#" in line):
                     current_section = "guidance"
-                    sections["guidance"] = line + "\n"
                     continue
-            elif any(keyword in line_upper for keyword in ["C. SPIRITUAL EXERCISES", "C. EXERCISES", "## SPIRITUAL EXERCISES", "## EXERCISES", "SPIRITUAL EXERCISES"]):
+            elif any(keyword in line_upper for keyword in ["C. SPIRITUAL EXERCISES", "C. EXERCISES", "## SPIRITUAL EXERCISES", "## EXERCISES", "SPIRITUAL EXERCISES", "C. PRACTICAL EXERCISES", "## PRACTICAL EXERCISES", "PRACTICAL EXERCISES"]):
                 if ("EXERCISES" in line_upper or "SPIRITUAL" in line_upper) and ("C." in line_upper or "##" in line or "#" in line):
                     current_section = "exercises"
-                    sections["exercises"] = line + "\n"
                     continue
             
             # Add content to current section
@@ -540,7 +537,7 @@ REMEMBER: Your response must be grounded in the verses provided above. Do not ad
         if not exercises_content:
             # Look for exercises section in the full text
             guidance_lower = guidance.lower()
-            exercises_keywords = ["spiritual exercises", "exercises", "c. spiritual", "c. exercises"]
+            exercises_keywords = ["spiritual exercises", "exercises", "c. spiritual", "c. exercises", "practical exercises", "c. practical exercises"]
             for keyword in exercises_keywords:
                 idx = guidance_lower.find(keyword)
                 if idx != -1:

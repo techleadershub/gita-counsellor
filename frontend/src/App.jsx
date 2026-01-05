@@ -197,6 +197,24 @@ function ResearchView() {
   const [currentQuery, setCurrentQuery] = useState('');
 
   const tabsContainerRef = useRef(null);
+  const progressRef = useRef(null);
+  const resultsRef = useRef(null);
+
+  useEffect(() => {
+    if (showProgress && progressRef.current) {
+      setTimeout(() => {
+        progressRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }, [showProgress]);
+
+  useEffect(() => {
+    if (result && resultsRef.current) {
+      setTimeout(() => {
+        resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [result]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -315,7 +333,7 @@ function ResearchView() {
       </div>
 
       {showProgress && (
-        <div className="max-w-3xl mx-auto animate-fade-in">
+        <div ref={progressRef} className="max-w-3xl mx-auto animate-fade-in">
           <ResearchProgress
             query={currentQuery}
             context={context}
@@ -336,7 +354,7 @@ function ResearchView() {
       )}
 
       {result && (<>
-        <div className="animate-slide-up space-y-8">
+        <div ref={resultsRef} className="animate-slide-up space-y-8">
           {/* Tabs Navigation */}
           {/* Tabs Navigation (Desktop) */}
           <div className="hidden sm:block sticky top-20 z-40 bg-starlight-50/95 backdrop-blur-md shadow-sm border-y border-starlight-200 rounded-2xl border px-2 py-2">
