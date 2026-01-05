@@ -1,17 +1,30 @@
 import { useState, useEffect, useRef } from 'react';
+import {
+  Search,
+  MessageSquare,
+  BookOpen,
+  Sparkles,
+  BrainCircuit,
+  CheckCircle2,
+  AlertCircle,
+  ScrollText,
+  Loader2,
+  Lightbulb,
+  FileText
+} from 'lucide-react';
 
 const stepIcons = {
-  analyzing: '🔍',
-  questions_generated: '💭',
-  researching: '📚',
-  searching_verse: '🔎',
-  verses_found: '✨',
-  searching_purports: '📖',
-  purports_found: '💡',
-  synthesizing: '🧘',
-  finalizing: '📝',
-  completed: '✅',
-  error: '❌'
+  analyzing: Search,
+  questions_generated: MessageSquare,
+  researching: BookOpen,
+  searching_verse: ScrollText,
+  verses_found: Sparkles,
+  searching_purports: BookOpen,
+  purports_found: Lightbulb,
+  synthesizing: BrainCircuit,
+  finalizing: FileText,
+  completed: CheckCircle2,
+  error: AlertCircle
 };
 
 const stepLabels = {
@@ -34,12 +47,12 @@ export default function ResearchProgress({ query, context, onComplete, onError }
   const [details, setDetails] = useState({});
   const [steps, setSteps] = useState([]);
   const [isComplete, setIsComplete] = useState(false);
-  
+
   // Use refs to avoid stale closures and dependency issues
   const isCompleteRef = useRef(false);
   const onCompleteRef = useRef(onComplete);
   const onErrorRef = useRef(onError);
-  
+
   // Update refs when callbacks change
   useEffect(() => {
     onCompleteRef.current = onComplete;
@@ -53,14 +66,14 @@ export default function ResearchProgress({ query, context, onComplete, onError }
     const controller = new AbortController();
     let isActive = true;
     isCompleteRef.current = false;
-    
+
     // Diagnostic logging
     console.log('🔍 ResearchProgress: Starting stream request');
     console.log('🔍 API_URL:', API_URL);
     console.log('🔍 Full URL:', `${API_URL}/api/research/stream`);
     console.log('🔍 Query:', query);
     console.log('🔍 Context:', context);
-    
+
     // Use fetch with streaming for SSE (since EventSource doesn't support POST)
     fetch(`${API_URL}/api/research/stream`, {
       method: 'POST',
@@ -77,19 +90,19 @@ export default function ResearchProgress({ query, context, onComplete, onError }
           headers: Object.fromEntries(response.headers.entries()),
           hasBody: !!response.body
         });
-        
+
         if (!response.ok) {
           console.error('❌ ResearchProgress: HTTP error', response.status, response.statusText);
           throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
         }
-        
+
         if (!response.body) {
           console.error('❌ ResearchProgress: Response body is null');
           throw new Error('Response body is null - streaming not supported');
         }
-        
+
         console.log('✅ ResearchProgress: Starting to read stream');
-        
+
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
@@ -97,7 +110,7 @@ export default function ResearchProgress({ query, context, onComplete, onError }
 
         function readStream() {
           if (!isActive) return;
-          
+
           reader.read().then(({ done, value }) => {
             if (done) {
               if (!isCompleteRef.current) {
@@ -105,7 +118,7 @@ export default function ResearchProgress({ query, context, onComplete, onError }
               }
               return;
             }
-            
+
             if (!value) {
               // Empty chunk, continue reading
               readStream();
@@ -128,7 +141,7 @@ export default function ResearchProgress({ query, context, onComplete, onError }
               if (line.trim() === '' || line.startsWith(':')) {
                 continue; // Skip empty lines and heartbeats
               }
-              
+
               if (line.startsWith('data: ')) {
                 try {
                   const data = JSON.parse(line.slice(6));
@@ -189,12 +202,12 @@ export default function ResearchProgress({ query, context, onComplete, onError }
 
     function handleProgress(data) {
       if (!isActive) return;
-      
+
       // Validate and safely extract data
       const step = data?.step || 'unknown';
       const message = data?.message || '';
       const details = data?.details || {};
-      
+
       setCurrentStep(step);
       setMessage(message);
       setDetails(details);
@@ -239,25 +252,30 @@ export default function ResearchProgress({ query, context, onComplete, onError }
   const currentStepIndex = allSteps.indexOf(currentStep || 'analyzing');
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-      <h3 className="text-xl font-bold text-gray-800 mb-4">Research Progress</h3>
-      
+    <div className="glass-panel rounded-2xl p-6 sm:p-8 mb-8 animate-fade-in shadow-xl shadow-nebula-100/50">
+      <h3 className="text-xl font-bold text-gray-900 mb-6 font-serif">Research Progress</h3>
+
       {/* Current Step */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <span className="text-3xl">{stepIcons[currentStep] || '⏳'}</span>
+      <div className="mb-8">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-nebula-100 to-nebula-200 flex items-center justify-center text-nebula-700 shadow-sm border border-nebula-200">
+            {(() => {
+              const Icon = stepIcons[currentStep] || Loader2;
+              return <Icon className={`w-6 h-6 ${!stepIcons[currentStep] ? 'animate-spin' : ''}`} />;
+            })()}
+          </div>
           <div className="flex-1">
-            <h4 className="font-semibold text-gray-800">
+            <h4 className="font-bold text-lg text-gray-900">
               {stepLabels[currentStep] || 'Processing...'}
             </h4>
-            <p className="text-sm text-gray-600">{message}</p>
+            <p className="text-sm text-gray-600 mt-1">{message}</p>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
+        <div className="w-full bg-starlight-200 rounded-full h-3 mt-4 overflow-hidden">
           <div
-            className="bg-saffron-600 h-2 rounded-full transition-all duration-500"
+            className="bg-gradient-to-r from-nebula-500 to-nebula-600 h-full rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(139,92,246,0.5)]"
             style={{
               width: isComplete
                 ? '100%'
@@ -268,61 +286,57 @@ export default function ResearchProgress({ query, context, onComplete, onError }
       </div>
 
       {/* Step Timeline */}
-      <div className="space-y-3">
+      <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
         {allSteps.map((step, index) => {
           const isActive = step === currentStep;
           const isCompleted = currentStepIndex > index || isComplete;
           const stepData = steps.find(s => s.step === step);
+          const StepIcon = stepIcons[step] || Loader2;
 
           return (
-            <div key={step} className="flex items-start gap-3">
+            <div key={step} className={`flex items-start gap-4 p-3 rounded-lg transition-colors ${isActive ? 'bg-nebula-50/50 border border-nebula-100' : ''}`}>
               <div
-                className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${
-                  isCompleted
-                    ? 'bg-saffron-600 text-white'
-                    : isActive
-                    ? 'bg-saffron-400 text-white animate-pulse'
-                    : 'bg-gray-200 text-gray-500'
-                }`}
+                className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all border ${isCompleted
+                  ? 'bg-nebula-600 text-white border-nebula-600 shadow-md shadow-nebula-500/30'
+                  : isActive
+                    ? 'bg-white text-nebula-600 border-nebula-400 animate-pulse-slow shadow-[0_0_8px_rgba(139,92,246,0.4)]'
+                    : 'bg-starlight-100 text-gray-400 border-starlight-200'
+                  }`}
               >
-                {isCompleted ? '✓' : index + 1}
+                {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : index + 1}
               </div>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">{stepIcons[step]}</span>
+                  <span className={`text-sm ${isCompleted || isActive ? 'text-nebula-700' : 'text-gray-400'}`}>
+                    <StepIcon className="w-4 h-4" />
+                  </span>
                   <span
-                    className={`font-medium ${
-                      isActive ? 'text-saffron-700' : isCompleted ? 'text-gray-700' : 'text-gray-400'
-                    }`}
+                    className={`font-medium text-sm sm:text-base truncate ${isActive ? 'text-nebula-900' : isCompleted ? 'text-gray-700' : 'text-gray-400'
+                      }`}
                   >
                     {stepLabels[step]}
                   </span>
                 </div>
                 {stepData && (
-                  <p className="text-xs text-gray-500 mt-1 ml-7">{stepData.message}</p>
+                  <p className="text-xs text-gray-500 mt-1 pl-7">{stepData.message}</p>
                 )}
                 {step === 'questions_generated' && details.count && (
-                  <p className="text-xs text-saffron-600 mt-1 ml-7">
+                  <p className="text-xs text-nebula-600 mt-1 pl-7 font-medium">
                     Generated {details.count} research questions
                   </p>
                 )}
                 {step === 'verses_found' && details.count && (
-                  <p className="text-xs text-saffron-600 mt-1 ml-7">
+                  <p className="text-xs text-nebula-600 mt-1 pl-7 font-medium">
                     Found {details.count} relevant verses
                   </p>
                 )}
                 {step === 'searching_verse' && details.current && details.total && (
-                  <p className="text-xs text-saffron-600 mt-1 ml-7">
+                  <p className="text-xs text-nebula-600 mt-1 pl-7 font-medium">
                     Question {details.current} of {details.total}
                   </p>
                 )}
-                {step === 'searching_purports' && details.current && details.total && (
-                  <p className="text-xs text-saffron-600 mt-1 ml-7">
-                    Purport query {details.current} of {details.total}
-                  </p>
-                )}
                 {step === 'purports_found' && details.count && (
-                  <p className="text-xs text-saffron-600 mt-1 ml-7">
+                  <p className="text-xs text-nebula-600 mt-1 pl-7 font-medium">
                     Found {details.count} additional verses from purports
                   </p>
                 )}
@@ -334,14 +348,19 @@ export default function ResearchProgress({ query, context, onComplete, onError }
 
       {/* Research Questions Preview */}
       {details.questions && details.questions.length > 0 && (
-        <div className="mt-6 p-4 bg-saffron-50 rounded-lg border border-saffron-200">
-          <h4 className="font-semibold text-saffron-800 mb-2">Research Questions:</h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
+        <div className="mt-8 p-6 bg-white/60 rounded-xl border border-nebula-100 shadow-inner">
+          <h4 className="font-bold text-nebula-900 mb-3 font-serif flex items-center gap-2">
+            <MessageSquare className="w-5 h-5" /> Research Questions Generated
+          </h4>
+          <ul className="space-y-3">
             {details.questions.slice(0, 3).map((q, idx) => (
-              <li key={idx}>{q}</li>
+              <li key={idx} className="flex items-start gap-3 text-sm text-gray-700 bg-white p-3 rounded-lg border border-starlight-100 shadow-sm">
+                <span className="text-nebula-400 mt-0.5">•</span>
+                <span>{q}</span>
+              </li>
             ))}
             {details.questions.length > 3 && (
-              <li className="text-saffron-600">...and {details.questions.length - 3} more</li>
+              <li className="text-nebula-600 text-sm font-medium italic pl-2">...and {details.questions.length - 3} more questions</li>
             )}
           </ul>
         </div>

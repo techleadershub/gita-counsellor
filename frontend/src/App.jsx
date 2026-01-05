@@ -1,25 +1,84 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { research } from './api';
 import ResearchProgress from './components/ResearchProgress';
+import {
+  BookOpen,
+  Github,
+  Sparkles,
+  Compass,
+  Flower2,
+  ScrollText,
+  Send,
+  Search,
+  MessageCircle,
+  Feather,
+  Brain,
+  Info
+} from 'lucide-react';
 
 function App() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-saffron-50 to-orange-100">
-      <nav className="bg-saffron-600 text-white shadow-lg sticky top-0 z-50">
+    <div className="min-h-screen bg-starlight-50 selection:bg-nebula-200 selection:text-nebula-900 font-sans">
+      <div className={`fixed inset-0 bg-[#f8fafc] -z-20`}></div>
+      {/* Mesh Gradient Background */}
+      <div className="fixed inset-0 -z-10 opacity-60" style={{
+        backgroundImage: `
+          radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%), 
+          radial-gradient(at 100% 0%, rgba(245, 158, 11, 0.1) 0px, transparent 50%)`
+      }}></div>
+
+      <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'glass-nav py-3' : 'bg-transparent py-5'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold">Gita Counsellor</h1>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-nebula-500/10 to-nebula-500/5 rounded-xl flex items-center justify-center border border-nebula-100 shadow-sm transform rotate-0 group transition-all hover:scale-105">
+                <img src="/logo.svg" alt="Gita Counsellor Logo" className="w-8 h-8 drop-shadow-sm" />
+              </div>
+              <div className="flex flex-col">
+                <h1 className="text-2xl font-bold text-gray-900 tracking-tight font-sans leading-none">Gita Counsellor</h1>
+                <span className="text-[10px] text-nebula-600 font-bold tracking-[0.2em] uppercase mt-1 hidden sm:block">Cosmic Wisdom</span>
+              </div>
             </div>
+
+            <a href="https://github.com/techleadershub/gita-counsellor" target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-nebula-600 transition-colors px-4 py-2 rounded-full hover:bg-starlight-100/50">
+              <Github className="w-4 h-4 fill-current" />
+              <span className="hidden sm:inline">About Project</span>
+            </a>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16">
         <ResearchView />
       </main>
+
+      <footer className="relative border-t border-starlight-200 bg-starlight-100/50 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-center items-center gap-2 text-center">
+          <p className="flex items-center gap-2 text-sm text-gray-500">
+            <span>Powered by AI & Ancient Wisdom</span>
+            <span className="hidden sm:inline w-1 h-1 rounded-full bg-gray-300"></span>
+          </p>
+          <a
+            href="https://www.linkedin.com/in/sridharjammalamadaka/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-medium text-nebula-600 hover:text-nebula-800 transition-colors flex items-center gap-1"
+          >
+            Built by Sridhar Jammalamadaka
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -34,18 +93,17 @@ function ResearchView() {
   const [showProgress, setShowProgress] = useState(false);
   const [currentQuery, setCurrentQuery] = useState('');
 
+  const tabsContainerRef = useRef(null);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!query.trim() || loading) return; // Prevent multiple submissions
+    if (!query.trim() || loading) return;
 
     setLoading(true);
     setError(null);
     setResult(null);
     setShowProgress(true);
     setCurrentQuery(query);
-    
-    // The ResearchProgress component will handle the streaming and call onComplete/onError
-    // We don't need to call research() here when using streaming
   };
 
   const handleProgressComplete = (data) => {
@@ -61,204 +119,261 @@ function ResearchView() {
     setLoading(false);
   };
 
+  const tabs = [
+    { id: 'answer', label: 'Divine Guidance', icon: Sparkles, color: 'text-amber-500', bg: 'bg-amber-50' },
+    { id: 'analysis', label: 'Deep Analysis', icon: Brain, color: 'text-blue-500', bg: 'bg-blue-50' },
+    { id: 'guidance', label: 'Action Plan', icon: Compass, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+    { id: 'exercises', label: 'Practices', icon: Flower2, color: 'text-rose-500', bg: 'bg-rose-50' },
+    { id: 'verses', label: `Verses`, count: result?.verses?.length, icon: ScrollText, color: 'text-nebula-600', bg: 'bg-nebula-50' },
+  ];
+
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">Ask Your Question</h2>
-        <p className="text-gray-600 mb-6">
-          Get comprehensive guidance from Bhagavad Gita for your modern problems and questions.
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Your Question or Problem *
-            </label>
-            <textarea
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="e.g., I'm feeling stressed about my career decisions. What should I do?"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent resize-none"
-              rows={4}
-              required
-            />
+    <div className="space-y-8 animate-fade-in">
+      {/* Hero / Input Section */}
+      <div className={`transition-all duration-700 ease-in-out ${result ? '' : 'max-w-3xl mx-auto mt-8 sm:mt-16'}`}>
+        {!result && (
+          <div className="text-center mb-12">
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6 font-serif leading-tight">
+              Seek Guidance from <br className="hidden sm:block" />
+              <span className="relative inline-block mt-2">
+                <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-nebula-600 to-nebula-400">The Bhagavad Gita</span>
+                <svg className="absolute -bottom-2 left-0 w-full h-3 text-nebula-200 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
+                  <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="8" fill="none" />
+                </svg>
+              </span>
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Facing a dilemma? Describe your situation and receive personalized wisdom drawn from the eternal verses.
+            </p>
           </div>
+        )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Additional Context (Optional)
-            </label>
-            <textarea
-              value={context}
-              onChange={(e) => setContext(e.target.value)}
-              placeholder="Provide any additional context about your situation..."
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-saffron-500 focus:border-transparent resize-none"
-              rows={3}
-            />
+        <div className={`glass-panel rounded-2xl p-1 shadow-2xl shadow-nebula-100/50 transition-all ${result ? 'border-b-0' : ''}`}>
+          <div className="bg-white rounded-xl border border-starlight-200 overflow-hidden">
+            <form onSubmit={handleSubmit} className="p-1">
+              <div className="space-y-1">
+                <div className="relative group">
+                  <div className="absolute top-6 left-5 text-gray-400 group-focus-within:text-nebula-500 transition-colors">
+                    <Search className="w-6 h-6" />
+                  </div>
+                  <textarea
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="What is troubling you today?"
+                    className="w-full pl-14 pr-5 py-5 bg-transparent border-none focus:ring-0 text-xl text-gray-800 placeholder-gray-300 resize-none font-serif leading-relaxed"
+                    rows={result ? 1 : 2}
+                    required
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSubmit(e);
+                      }
+                    }}
+                  />
+                </div>
+
+                <div className={`${result ? 'hidden' : 'block'} border-t border-dashed border-gray-100 relative group animate-slide-up`}>
+                  <div className="absolute top-4 left-5 text-gray-400 group-focus-within:text-nebula-500 transition-colors">
+                    <MessageCircle className="w-5 h-5" />
+                  </div>
+                  <textarea
+                    value={context}
+                    onChange={(e) => setContext(e.target.value)}
+                    placeholder="Add context (optional)..."
+                    className="w-full pl-14 pr-5 py-4 bg-transparent border-none focus:ring-0 text-gray-600 placeholder-gray-300 resize-none"
+                    rows={1}
+                  />
+                </div>
+              </div>
+
+              <div className="px-4 pb-4 flex justify-between items-center bg-starlight-50/30 rounded-b-lg">
+                <div className="text-xs text-gray-400 hidden sm:block">
+                  <span className="flex items-center gap-1"><Info className="w-3 h-3" /> Press Enter to search</span>
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading || !query.trim()}
+                  className="ml-auto group relative overflow-hidden rounded-xl bg-gradient-to-r from-nebula-600 to-nebula-500 px-6 py-2.5 text-white shadow-lg transition-all hover:shadow-nebula-500/30 hover:scale-[1.02] disabled:opacity-70 disabled:hover:scale-100"
+                >
+                  <span className="relative flex items-center justify-center gap-2 font-semibold tracking-wide text-sm">
+                    {loading ? (
+                      'Processing...'
+                    ) : (
+                      <>
+                        Get Guidance
+                        <Send className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                      </>
+                    )}
+                  </span>
+                </button>
+              </div>
+            </form>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading || !query.trim()}
-            className="w-full bg-saffron-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-saffron-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            {loading ? 'Researching...' : 'Get Guidance from Bhagavad Gita'}
-          </button>
-        </form>
+        </div>
       </div>
 
       {showProgress && (
-        <ResearchProgress
-          query={currentQuery}
-          context={context}
-          onComplete={handleProgressComplete}
-          onError={handleProgressError}
-        />
+        <div className="max-w-3xl mx-auto animate-fade-in">
+          <ResearchProgress
+            query={currentQuery}
+            context={context}
+            onComplete={handleProgressComplete}
+            onError={handleProgressError}
+          />
+        </div>
       )}
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">{error}</p>
+        <div className="max-w-3xl mx-auto bg-red-50 border border-red-100 rounded-xl p-6 text-center animate-fade-in flex flex-col items-center">
+          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-3">
+            <span className="text-2xl">⚠️</span>
+          </div>
+          <p className="text-red-800 font-medium mb-2">{error}</p>
+          <button onClick={() => setError(null)} className="text-sm text-red-600 hover:text-red-800 font-medium">Try Again</button>
         </div>
       )}
 
       {result && (
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="border-b border-gray-200">
-            <div className="flex">
-              <button
-                onClick={() => setActiveTab('answer')}
-                className={`flex-1 px-6 py-4 font-semibold transition ${
-                  activeTab === 'answer'
-                    ? 'bg-saffron-50 text-saffron-700 border-b-2 border-saffron-600'
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                Complete Answer
-              </button>
-              <button
-                onClick={() => setActiveTab('analysis')}
-                className={`flex-1 px-6 py-4 font-semibold transition ${
-                  activeTab === 'analysis'
-                    ? 'bg-saffron-50 text-saffron-700 border-b-2 border-saffron-600'
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                Analysis
-              </button>
-              <button
-                onClick={() => setActiveTab('guidance')}
-                className={`flex-1 px-6 py-4 font-semibold transition ${
-                  activeTab === 'guidance'
-                    ? 'bg-saffron-50 text-saffron-700 border-b-2 border-saffron-600'
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                Practical Guidance
-              </button>
-              <button
-                onClick={() => setActiveTab('exercises')}
-                className={`flex-1 px-6 py-4 font-semibold transition ${
-                  activeTab === 'exercises'
-                    ? 'bg-saffron-50 text-saffron-700 border-b-2 border-saffron-600'
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                Exercises
-              </button>
-              <button
-                onClick={() => setActiveTab('verses')}
-                className={`flex-1 px-6 py-4 font-semibold transition ${
-                  activeTab === 'verses'
-                    ? 'bg-saffron-50 text-saffron-700 border-b-2 border-saffron-600'
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                Verses ({result.verses?.length || 0})
-              </button>
+        <div className="animate-slide-up space-y-8">
+          {/* Tabs Navigation */}
+          <div className="sticky top-20 z-40 bg-starlight-50/95 backdrop-blur-md shadow-sm border-y border-starlight-200 -mx-4 sm:mx-0 sm:rounded-2xl sm:border px-2 py-2">
+            <div
+              ref={tabsContainerRef}
+              className="flex overflow-x-auto hide-scrollbar sm:justify-center gap-1 snap-x p-1"
+            >
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex-none snap-center flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all whitespace-nowrap ${isActive
+                      ? 'bg-white text-nebula-700 shadow-md ring-1 ring-black/5'
+                      : 'text-gray-500 hover:bg-white/50 hover:text-gray-900'
+                      }`}
+                  >
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-nebula-600' : 'text-gray-400'}`} />
+                    <span>{tab.label}</span>
+                    {tab.count !== undefined && (
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-nebula-100 text-nebula-700' : 'bg-starlight-200 text-gray-500'}`}>
+                        {tab.count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          <div className="p-6">
-            {activeTab === 'answer' && (
-              <div className="prose prose-lg max-w-none">
-                <ReactMarkdown>{result.answer}</ReactMarkdown>
-              </div>
-            )}
+          {/* Content Area */}
+          <div className="glass-panel rounded-3xl p-6 sm:p-12 min-h-[500px] relative overflow-hidden">
+            {/* Background Texture */}
+            <div className="absolute top-0 right-0 p-12 opacity-[0.02] pointer-events-none">
+              <Flower2 className="w-96 h-96" />
+            </div>
 
-            {activeTab === 'analysis' && (
-              <div className="prose prose-lg max-w-none">
-                <ReactMarkdown>{result.analysis}</ReactMarkdown>
-              </div>
-            )}
-
-            {activeTab === 'guidance' && (
-              <div className="prose prose-lg max-w-none">
-                <ReactMarkdown>{result.guidance}</ReactMarkdown>
-              </div>
-            )}
-
-            {activeTab === 'exercises' && (
-              <div className="prose prose-lg max-w-none">
-                {result.exercises && result.exercises.trim() ? (
-                  <ReactMarkdown>{result.exercises}</ReactMarkdown>
-                ) : (
-                  <div className="text-center py-12">
-                    <p className="text-gray-500 italic mb-4">Spiritual exercises are being generated based on the verses referenced above.</p>
-                    <p className="text-sm text-gray-400">Please check the "Answer" tab for complete guidance including exercises.</p>
+            {tabs.map((tab) => {
+              if (activeTab !== tab.id) return null;
+              const HeaderIcon = tab.icon;
+              return (
+                <div key={tab.id} className="animate-fade-in relative z-10">
+                  <div className="flex items-center gap-4 mb-8 pb-8 border-b border-starlight-200">
+                    <div className={`p-3 rounded-xl ${tab.bg}`}>
+                      <HeaderIcon className={`w-8 h-8 ${tab.color}`} />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900 font-serif">{tab.label}</h3>
+                      <p className="text-sm text-gray-500">Divine insight for your situation</p>
+                    </div>
                   </div>
-                )}
-              </div>
-            )}
 
-            {activeTab === 'verses' && (
-              <div className="space-y-8">
-                {result.verses && result.verses.length > 0 ? (
-                  result.verses.map((verse, idx) => (
-                    <div key={idx} className={`bg-gradient-to-br from-white to-saffron-50 border border-saffron-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200 ${idx > 0 ? 'mt-8' : ''}`}>
-                      <div className="flex justify-between items-start mb-5 pb-4 border-b-2 border-saffron-200">
-                        <h4 className="text-xl font-bold text-saffron-700">{verse.verse_id}</h4>
-                        <span className="text-xs font-semibold text-gray-700 bg-saffron-100 px-3 py-1.5 rounded-full uppercase tracking-wide">
-                          Chapter {verse.chapter}, Verse {verse.verse_number}
-                        </span>
-                      </div>
-                      {verse.transliteration && (
-                        <div className="mb-5">
-                          <p className="text-xs font-semibold text-saffron-700 mb-2 uppercase tracking-wider">Transliteration</p>
-                          <p className="text-gray-800 text-lg leading-relaxed bg-white p-4 rounded-lg border-l-4 border-saffron-400 italic whitespace-pre-line font-serif">{verse.transliteration}</p>
-                        </div>
-                      )}
-                      {verse.word_meanings && (
-                        <div className="mb-5">
-                          <p className="text-xs font-semibold text-saffron-700 mb-2 uppercase tracking-wider">Word Meanings</p>
-                          <p className="text-gray-700 text-sm leading-relaxed bg-saffron-50 p-3 rounded-lg">{verse.word_meanings}</p>
-                        </div>
-                      )}
-                      {verse.translation && (
-                        <div className="mb-5">
-                          <p className="text-xs font-semibold text-saffron-700 mb-2 uppercase tracking-wider">Translation</p>
-                          <blockquote className="text-gray-800 text-base leading-relaxed border-l-4 border-saffron-400 pl-4 italic bg-white p-4 rounded-lg shadow-sm">
-                            {verse.translation}
-                          </blockquote>
-                        </div>
-                      )}
-                      {verse.purport && (
-                        <div className="mt-5">
-                          <p className="text-xs font-semibold text-saffron-700 mb-2 uppercase tracking-wider">Purport</p>
-                          <div className="text-gray-700 leading-relaxed bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
-                            <p className="whitespace-pre-wrap">{verse.purport}</p>
+                  {tab.id === 'answer' && (
+                    <div className="prose prose-lg prose-saffron max-w-none">
+                      <ReactMarkdown>{result.answer}</ReactMarkdown>
+                    </div>
+                  )}
+                  {tab.id === 'analysis' && (
+                    <div className="prose prose-lg prose-saffron max-w-none">
+                      <ReactMarkdown>{result.analysis}</ReactMarkdown>
+                    </div>
+                  )}
+                  {tab.id === 'guidance' && (
+                    <div className="prose prose-lg prose-saffron max-w-none">
+                      <ReactMarkdown>{result.guidance}</ReactMarkdown>
+                    </div>
+                  )}
+                  {tab.id === 'exercises' && (
+                    <div className="prose prose-lg prose-saffron max-w-none">
+                      {result.exercises && result.exercises.trim() ? (
+                        <ReactMarkdown>{result.exercises}</ReactMarkdown>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-20 text-center">
+                          <div className="w-16 h-16 bg-starlight-100 rounded-full flex items-center justify-center mb-4 text-starlight-400">
+                            <Flower2 className="w-8 h-8" />
                           </div>
+                          <p className="text-gray-500 italic max-w-md">Reflect on the guidance provided in the main answer section to derive your own spiritual exercises.</p>
                         </div>
                       )}
                     </div>
-                  ))
-                ) : (
-                  <div className="text-center py-12">
-                    <p className="text-gray-500 text-lg">No verses found</p>
-                  </div>
-                )}
-              </div>
-            )}
+                  )}
+                  {tab.id === 'verses' && (
+                    <div className="space-y-8">
+                      {result.verses && result.verses.length > 0 ? (
+                        result.verses.map((verse, idx) => (
+                          <div key={idx} className="group relative bg-white border border-starlight-200 rounded-2xl p-6 sm:p-8 hover:shadow-xl hover:border-nebula-300 transition-all duration-300">
+                            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-6 pb-4 border-b border-starlight-100 gap-2">
+                              <h4 className="text-xl font-bold font-serif text-nebula-800 tracking-tight">{verse.verse_id}</h4>
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-starlight-100 text-nebula-800 uppercase tracking-widest border border-starlight-200">
+                                <ScrollText className="w-3 h-3" />
+                                Chapter {verse.chapter} • Verse {verse.verse_number}
+                              </span>
+                            </div>
+
+                            {verse.transliteration && (
+                              <div className="mb-6 bg-starlight-50/50 p-6 rounded-xl border-l-4 border-nebula-400">
+                                <p className="text-lg text-gray-800 font-serif italic text-center leading-loose">{verse.transliteration}</p>
+                              </div>
+                            )}
+
+                            <div className="grid gap-6">
+                              {verse.word_meanings && (
+                                <div className="text-sm text-gray-600 bg-starlight-50/30 p-4 rounded-lg border border-starlight-100">
+                                  <span className="font-bold text-nebula-700 block mb-2 uppercase text-xs tracking-wider">Word Meanings</span>
+                                  <div className="leading-relaxed">{verse.word_meanings}</div>
+                                </div>
+                              )}
+
+                              {verse.translation && (
+                                <div>
+                                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-3">Translation</span>
+                                  <blockquote className="text-xl text-gray-900 font-serif leading-relaxed border-l-2 border-nebula-200 pl-4">
+                                    "{verse.translation}"
+                                  </blockquote>
+                                </div>
+                              )}
+
+                              {verse.purport && (
+                                <div className="pt-4 border-t border-starlight-100">
+                                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-3">Purport</span>
+                                  <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                                    {verse.purport}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-20">
+                          <p className="text-gray-500 text-lg">No direct verses were cited for this query.</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -267,4 +382,3 @@ function ResearchView() {
 }
 
 export default App;
-
