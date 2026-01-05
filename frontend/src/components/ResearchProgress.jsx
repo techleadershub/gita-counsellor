@@ -6,6 +6,8 @@ const stepIcons = {
   researching: '📚',
   searching_verse: '🔎',
   verses_found: '✨',
+  searching_purports: '📖',
+  purports_found: '💡',
   synthesizing: '🧘',
   finalizing: '📝',
   completed: '✅',
@@ -18,6 +20,8 @@ const stepLabels = {
   researching: 'Searching Bhagavad Gita',
   searching_verse: 'Finding Relevant Verses',
   verses_found: 'Verses Found',
+  searching_purports: 'Searching Purports',
+  purports_found: 'Purports Found',
   synthesizing: 'Synthesizing Guidance',
   finalizing: 'Finalizing Answer',
   completed: 'Complete',
@@ -231,7 +235,7 @@ export default function ResearchProgress({ query, context, onComplete, onError }
 
   if (!query) return null;
 
-  const allSteps = ['analyzing', 'questions_generated', 'researching', 'searching_verse', 'verses_found', 'synthesizing', 'finalizing'];
+  const allSteps = ['analyzing', 'questions_generated', 'researching', 'searching_verse', 'verses_found', 'searching_purports', 'purports_found', 'synthesizing', 'finalizing'];
   const currentStepIndex = allSteps.indexOf(currentStep || 'analyzing');
 
   return (
@@ -310,6 +314,16 @@ export default function ResearchProgress({ query, context, onComplete, onError }
                 {step === 'searching_verse' && details.current && details.total && (
                   <p className="text-xs text-saffron-600 mt-1 ml-7">
                     Question {details.current} of {details.total}
+                  </p>
+                )}
+                {step === 'searching_purports' && details.current && details.total && (
+                  <p className="text-xs text-saffron-600 mt-1 ml-7">
+                    Purport query {details.current} of {details.total}
+                  </p>
+                )}
+                {step === 'purports_found' && details.count && (
+                  <p className="text-xs text-saffron-600 mt-1 ml-7">
+                    Found {details.count} additional verses from purports
                   </p>
                 )}
               </div>

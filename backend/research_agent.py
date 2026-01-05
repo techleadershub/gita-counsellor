@@ -184,6 +184,112 @@ Make questions specific and focused. Return ONLY the questions, one per line, no
         self.emit_progress("verses_found", f"Found {len(unique_verses)} relevant verses from the Bhagavad Gita", {"count": len(unique_verses)})
         return {"relevant_verses": unique_verses}
 
+    def research_purports_node(self, state: AgentState):
+        """Separate RAG search specifically targeting purports for deeper insights."""
+        query = state["user_query"]
+        context = state["problem_context"]
+        existing_verses = state.get("relevant_verses", [])
+        existing_verse_ids = {v.get("verse_id") for v in existing_verses if v.get("verse_id")}
+        
+        self.log("Searching purports for deeper insights...")
+        self.emit_progress("searching_purports", "Searching purports for deeper explanations and insights...", {"query": query})
+        
+        # Generate purport-specific search queries
+        # Purports often contain deeper explanations, practical applications, and contextual insights
+        purport_prompt = f"""Based on this user query and context, generate 2-3 search queries that would find relevant explanations, insights, or deeper meanings in the purports (commentaries) of Bhagavad Gita verses.
+
+User Query: {query}
+Context: {context if context else 'Modern challenges and contemporary life'}
+
+Purports contain:
+- Deeper explanations of verse meanings
+- Practical applications and examples
+- Contextual insights and connections to other teachings
+- Clarifications of complex concepts
+- Guidance on how to apply the teachings
+
+Generate search queries that would find verses where the PURPORT (not just translation) contains relevant explanations. Focus on:
+- Concepts that need deeper explanation
+- Practical applications
+- Spiritual insights
+- How the teachings apply to modern life
+
+Return ONLY the queries, one per line, no numbering or bullets."""
+        
+        try:
+            response = self.llm.invoke([SystemMessage(content=purport_prompt)])
+            purport_queries = [q.strip() for q in response.content.split("\n") if q.strip() and not q.strip().startswith("#")]
+            
+            if not purport_queries:
+                # Fallback: use original query with purport-focused keywords
+                purport_queries = [
+                    f"explanation of {query}",
+                    f"practical application of {query}",
+                    f"deeper meaning of {query}"
+                ]
+            
+            self.log(f"Generated {len(purport_queries)} purport-specific search queries")
+            self.emit_progress("searching_purports", f"Searching {len(purport_queries)} purport-specific queries...", {"queries": purport_queries})
+            
+            all_purport_verses = []
+            
+            for i, purport_query in enumerate(purport_queries, 1):
+                self.log(f"  [{i}/{len(purport_queries)}] Searching purports: {purport_query}")
+                self.emit_progress("searching_purports", f"Searching purports: {purport_query[:60]}...", {"current": i, "total": len(purport_queries), "query": purport_query})
+                
+                # Search vector store with error handling
+                try:
+                    results = self.vector_store.search(purport_query, limit=5)
+                    self.log(f"    Found {len(results)} verses from purport search")
+                except Exception as e:
+                    self.log(f"    Error searching purports: {e}")
+                    continue  # Skip this query and continue with next
+                
+                # Get full verse details from SQLite
+                db_session = get_db_session()
+                try:
+                    for result in results:
+                        try:
+                            verse_id = result.get("verse_id", "") or result.get("chunk", {}).get("verse_id", "")
+                            
+                            if verse_id:
+                                # Skip if already found in verse search
+                                if verse_id in existing_verse_ids:
+                                    continue
+                                
+                                verse = db_session.query(Verse).filter_by(verse_id=verse_id).first()
+                                if verse and verse.purport:  # Only include verses with purports
+                                    verse_dict = verse.to_dict()
+                                    verse_dict["relevance_score"] = result.get("score", 0)
+                                    verse_dict["research_question"] = purport_query
+                                    verse_dict["source"] = "purport_search"  # Mark as from purport search
+                                    all_purport_verses.append(verse_dict)
+                        except Exception as e:
+                            self.log(f"    Error processing purport result: {e}")
+                            continue  # Skip this result and continue
+                finally:
+                    db_session.close()
+            
+            # Deduplicate by verse_id
+            seen_verse_ids = set()
+            unique_purport_verses = []
+            for verse in all_purport_verses:
+                verse_id = verse.get("verse_id")
+                if verse_id and verse_id not in seen_verse_ids:
+                    seen_verse_ids.add(verse_id)
+                    unique_purport_verses.append(verse)
+            
+            self.log(f"Found {len(unique_purport_verses)} additional unique verses from purport search")
+            self.emit_progress("purports_found", f"Found {len(unique_purport_verses)} additional verses with relevant purports", {"count": len(unique_purport_verses)})
+            
+            # Return new verses to be added to existing ones (using operator.add in state)
+            return {"relevant_verses": unique_purport_verses}
+            
+        except Exception as e:
+            self.log(f"Error in purport search: {e}")
+            self.emit_progress("purports_found", "Purport search completed with some errors", {"count": 0})
+            return {"relevant_verses": []}  # Return empty list on error
+
     def synthesize_guidance_node(self, state: AgentState):
         """Synthesize comprehensive guidance from verses."""
         query = state["user_query"]
@@ -601,12 +707,14 @@ The following verses from the Bhagavad Gita provide the foundation for this guid
         
         workflow.add_node("analyze_problem", self.analyze_problem_node)
         workflow.add_node("research_verses", self.research_verses_node)
+        workflow.add_node("research_purports", self.research_purports_node)
         workflow.add_node("synthesize_guidance", self.synthesize_guidance_node)
         workflow.add_node("finalize_answer", self.finalize_answer_node)
         
         workflow.set_entry_point("analyze_problem")
         workflow.add_edge("analyze_problem", "research_verses")
-        workflow.add_edge("research_verses", "synthesize_guidance")
+        workflow.add_edge("research_verses", "research_purports")  # New step: search purports after verse search
+        workflow.add_edge("research_purports", "synthesize_guidance")
         workflow.add_edge("synthesize_guidance", "finalize_answer")
         workflow.add_edge("finalize_answer", END)
         

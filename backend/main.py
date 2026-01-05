@@ -302,6 +302,85 @@ async def get_verse_by_id(verse_id: str):
         logging.error(f"Error fetching verse: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/debug/verse/{verse_id}")
+async def debug_verse(verse_id: str):
+    """Debug endpoint to see what text is embedded for a verse and verify purport usage."""
+    try:
+        db_session = get_db_session()
+        verse = db_session.query(Verse).filter_by(verse_id=verse_id).first()
+        db_session.close()
+        
+        if not verse:
+            raise HTTPException(status_code=404, detail="Verse not found")
+        
+        # Get what would be embedded
+        from models import VerseChunk
+        chunk = VerseChunk(
+            verse_id=verse.verse_id,
+            chapter=verse.chapter,
+            verse_number=verse.verse_number,
+            sanskrit=verse.sanskrit,
+            synonyms=verse.synonyms,
+            translation=verse.translation,
+            purport=verse.purport
+        )
+        embedded_text = chunk.to_text_for_embedding()
+        
+        # Get what would be sent to LLM
+        verse_dict = verse.to_dict()
+        llm_context = f"""
+Verse {verse_dict['verse_id']} (Chapter {verse_dict['chapter']}, Verse {verse_dict['verse_number']}):
+Transliteration: {verse_dict.get('transliteration', 'N/A')}
+Word Meanings: {verse_dict.get('word_meanings', 'N/A')}
+Translation: {verse_dict.get('translation', 'N/A')}
+Purport: {verse_dict.get('purport', 'N/A')}
+"""
+        
+        # Test search with unique purport terms
+        unique_purport_terms = []
+        if verse.purport and verse.translation:
+            import re
+            translation_words = set(re.findall(r'\b[a-z]{3,}\b', verse.translation.lower()))
+            purport_words = set(re.findall(r'\b[a-z]{3,}\b', verse.purport.lower()))
+            common_words = {'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'}
+            unique_words = purport_words - translation_words - common_words
+            unique_purport_terms = list(unique_words)[:10]
+        
+        search_test = None
+        if unique_purport_terms:
+            try:
+                vs = get_vector_store()
+                test_query = ' '.join(unique_purport_terms[:5])
+                results = vs.search(test_query, limit=5)
+                found = any(
+                    (r.get("verse_id", "") or r.get("chunk", {}).get("verse_id", "")) == verse_id
+                    for r in results
+                )
+                search_test = {
+                    "query": test_query,
+                    "found": found,
+                    "rank": next((i+1 for i, r in enumerate(results) if (r.get("verse_id", "") or r.get("chunk", {}).get("verse_id", "")) == verse_id), None)
+                }
+            except Exception as e:
+                search_test = {"error": str(e)}
+        
+        return {
+            "verse_id": verse_id,
+            "embedded_text_length": len(embedded_text),
+            "embedded_text_preview": embedded_text[:500] + "..." if len(embedded_text) > 500 else embedded_text,
+            "purport_in_embedded": "Purport:" in embedded_text,
+            "purport_length": len(verse.purport) if verse.purport else 0,
+            "llm_context_length": len(llm_context),
+            "purport_in_llm_context": "Purport:" in llm_context,
+            "unique_purport_terms": unique_purport_terms,
+            "search_test": search_test
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error in debug endpoint: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/ingest")
 async def ingest_epub(request: IngestionRequest):
     """Ingest Bhagavad Gita EPUB file."""
