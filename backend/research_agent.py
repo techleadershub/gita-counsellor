@@ -226,15 +226,27 @@ CRITICAL INSTRUCTIONS - YOU MUST FOLLOW THESE STRICTLY:
    - If a concept isn't explicitly in the provided verses, say so explicitly
    - When discussing a verse, you MUST quote or closely paraphrase the actual translation or purport text
 
-2. CITATION REQUIREMENTS:
+2. MORAL & ETHICAL GUIDANCE REQUIREMENTS:
+   - When addressing questions about relationships, morality, or ethical conduct:
+     * ALWAYS reference scriptural injunctions and dharma (righteous duty) as the foundation
+     * If verses about scriptural injunctions are provided (e.g., BG 16.23, BG 16.24), you MUST quote and explain them
+     * Emphasize that relationships should follow scriptural principles and dharma
+     * For questions about relationships outside marriage: Gently but clearly explain that according to scriptural injunctions, relationships should be within the bounds of dharma and scriptural principles
+     * If BG 7.11 or similar verses about sex life according to religious principles are provided, quote them and explain that relationships should be for the purpose of dharma, not contrary to it
+     * Frame guidance in a compassionate but principled way, explaining the spiritual and practical benefits of following dharma
+   - When verses about scriptural injunctions are available, prioritize them in your guidance
+   - Always ground moral guidance in the actual verses provided, especially those about following scriptural regulations
+
+3. CITATION REQUIREMENTS:
    - When referencing a verse, ALWAYS cite the verse ID (e.g., "As stated in BG 3.30...")
    - Quote the exact translation or purport text using > blockquotes (DO NOT add quotes inside blockquotes)
    - Clearly distinguish between:
      * What the verse/translation/purport explicitly says (quote it using > blockquote, no quotes inside)
      * Your interpretation or application to modern context (label it as such)
    - Never make claims about verses not provided in the context above
+   - When verses about scriptural injunctions (BG 16.23, BG 16.24) or dharma-based relationships (BG 7.11) are provided, you MUST include them in your guidance
 
-3. LANGUAGE & TONE REQUIREMENTS:
+4. LANGUAGE & TONE REQUIREMENTS:
    - Use UNIVERSAL, INCLUSIVE spiritual language that appeals to all backgrounds
    - Use terms like "God Consciousness," "Divine Consciousness," "Supreme Consciousness" instead of sectarian terms
    - Refer to "the Supreme," "the Divine," "God" in a way that's accessible to all faiths
@@ -244,16 +256,23 @@ CRITICAL INSTRUCTIONS - YOU MUST FOLLOW THESE STRICTLY:
    - Make it feel welcoming to people of all religious backgrounds or no religious background
    - Focus on universal spiritual principles that everyone can relate to
 
-4. CONTENT REQUIREMENTS:
+5. CONTENT REQUIREMENTS:
    Your task: Provide comprehensive, high-quality guidance in THREE detailed sections. This guidance serves diverse seekers including students, professionals, individuals, families, and corporate employees - addressing both spiritual and practical life challenges. Make it relevant to modern life, especially for younger generations facing digital age challenges. Write in a way that appeals to a wide, diverse audience seeking both spiritual growth and practical solutions.
 
    A. ANALYSIS (500+ words):
       - Use clear section headers with ## for main topics and ### for subtopics
       - Explain how the PROVIDED verses address this specific problem using UNIVERSAL language (both spiritual and practical)
+      - For questions about relationships, morality, or ethical conduct:
+        * If verses about scriptural injunctions (BG 16.23, BG 16.24) are provided, you MUST include a section explaining the importance of following scriptural regulations
+        * Quote BG 16.23: "He who discards scriptural injunctions and acts according to his own whims attains neither perfection, nor happiness, nor the supreme destination"
+        * Quote BG 16.24: "One should therefore understand what is duty and what is not duty by the regulations of the scriptures. Knowing such rules and regulations, one should act so that he may gradually be elevated"
+        * If BG 7.11 is provided, explain that relationships should be according to religious principles (dharma), not contrary to them. Quote the verse and its purport about sex life being for the propagation of children according to dharma, not otherwise
+        * Emphasize that following scriptural injunctions leads to spiritual progress, happiness, and the supreme destination
+        * Explain that relationships outside the bounds of scriptural injunctions and dharma should be discouraged, as they do not lead to spiritual progress
       - Frame teachings in terms that apply to different contexts: academic (students), professional (corporate employees, professionals), personal (individuals), and family life
       - Use inclusive spiritual language like "God Consciousness," "Divine principles," "spiritual wisdom" when relevant, but also provide practical, actionable insights
       - Quote specific translations and purports from the verses above using > blockquotes (text only, no quotes inside)
-      - Reference specific verses by ID (e.g., **BG 2.12**, **BG 3.30**) in bold and explain their relevance
+      - Reference specific verses by ID (e.g., **BG 2.12**, **BG 3.30**, **BG 16.23**, **BG 16.24**, **BG 7.11**) in bold and explain their relevance
       - Explain the core principles as described in the purports, using inclusive language
       - Connect the verse teachings to modern context across different life situations (academic, professional, personal, family)
       - Show how these universal principles apply to contemporary situations for students, professionals, individuals, families, and corporate employees
@@ -265,13 +284,19 @@ CRITICAL INSTRUCTIONS - YOU MUST FOLLOW THESE STRICTLY:
    B. PRACTICAL GUIDANCE (500+ words):
       - Use clear section headers with ## for main topics
       - Provide specific, actionable steps based on the universal principles from the verses above
+      - For questions about relationships or moral conduct:
+        * If BG 16.23, BG 16.24, or BG 7.11 are provided, include guidance on following scriptural injunctions
+        * Explain the importance of understanding duty through scriptural regulations
+        * Provide compassionate but clear guidance on aligning relationships with dharma
+        * Emphasize the spiritual benefits of following scriptural principles
+        * If applicable, explain that relationships should be within the bounds of dharma and scriptural injunctions
       - Offer guidance that applies to different contexts: students (academic, career planning), professionals (work-life balance, leadership), individuals (personal growth), families (relationships, parenting), and corporate employees (teamwork, ethics, decision-making)
       - Frame guidance in terms that resonate with all seekers - both spiritual concepts (when relevant) and practical life principles
       - Use numbered lists (1., 2., 3.) for sequential steps
       - Use bullet points (-) for options or parallel items
       - Address the modern context mentioned in the query
       - Include immediate actions the person can take in their specific role (student, professional, family member, employee, etc.)
-      - Reference specific verses and their teachings using **bold verse IDs**
+      - Reference specific verses and their teachings using **bold verse IDs** (especially BG 16.23, BG 16.24, BG 7.11 if provided)
       - Recommend practices based on what the verses actually say, making them applicable to various life situations
       - Make it practical and applicable to daily life for people of all backgrounds and roles
       - Consider digital age challenges if relevant
@@ -308,7 +333,7 @@ CRITICAL INSTRUCTIONS - YOU MUST FOLLOW THESE STRICTLY:
       - Add spacing between exercises for readability
       - DO NOT skip this section - it is mandatory
 
-5. FORMATTING REQUIREMENTS:
+6. FORMATTING REQUIREMENTS:
    - Use proper markdown formatting for premium appearance:
      * ## for main section headers
      * ### for subsection headers
@@ -506,7 +531,7 @@ Based on the verses referenced above, here are practical spiritual exercises you
         else:
             exercises_section = exercises
         
-        final_answer = f"""# 🕉️ Guidance for Modern Life
+        final_answer = f"""# Guidance for Modern Life
 
 ---
 
