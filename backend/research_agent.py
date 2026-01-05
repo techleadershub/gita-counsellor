@@ -49,15 +49,15 @@ class ResearchAgent:
         query = state["user_query"]
         self.log(f"Analyzing problem: '{query}'...")
         
-        prompt = f"""You are an expert spiritual counselor analyzing a modern person's problem or question, with special attention to Gen Z and Gen Alpha challenges.
+        prompt = f"""You are an expert counselor analyzing a modern person's problem or question, providing guidance for diverse seekers including students, professionals, individuals, families, and corporate employees. Use universal, inclusive language that appeals to people of all backgrounds.
 
 User's Query: "{query}"
 
 Your task:
-1. Identify the core issue or question (consider modern context like digital age, social media, AI, etc.)
-2. Extract key themes (e.g., stress, relationships, purpose, decision-making, leadership, resilience, morals, ethics, etc.)
-3. Identify which Bhagavad Gita principles might be relevant (karma yoga, dharma, detachment, equanimity, self-knowledge, etc.)
-4. Note any generational or modern context (Gen Z, Gen Alpha, digital age, social media, technology, etc.)
+1. Identify the core issue or question (consider modern context like digital age, social media, AI, etc., and different life contexts: academic, professional, personal, family, corporate)
+2. Extract key themes (e.g., stress, relationships, purpose, decision-making, leadership, resilience, morals, ethics, career, studies, work-life balance, etc.)
+3. Identify which universal principles from the Bhagavad Gita might be relevant (both spiritual and practical: selfless service, divine purpose, detachment, equanimity, self-knowledge, God Consciousness, duty, responsibility, etc.)
+4. Note any generational or modern context (Gen Z, Gen Alpha, digital age, social media, technology, etc.) and the type of seeker (student, professional, individual, family member, corporate employee)
 
 Return a structured analysis in this format:
 CORE_ISSUE: [one sentence describing the core problem, including modern context if relevant]
@@ -159,7 +159,7 @@ Purport: {v.get('purport', 'N/A')}
         
         verses_context = "\n---\n".join(verses_text)
         
-        prompt = f"""You are an expert spiritual guide helping a modern person (especially Gen Z or Gen Alpha) solve their problem using timeless Bhagavad Gita wisdom.
+        prompt = f"""You are an expert counselor and guide helping modern people solve their problems using timeless wisdom from the Bhagavad Gita. You provide both spiritual and practical guidance for diverse seekers including students, professionals, individuals, families, and corporate employees. Write in a universal, inclusive style that appeals to people of all backgrounds and faiths, similar to how A.C. Bhaktivedanta Swami Prabhupada wrote in "Science of Self Realization" - using terms like "God Consciousness" and universal principles that resonate with everyone.
 
 User's Problem: {query}
 Context: {context if context else 'Modern challenges and contemporary life'}
@@ -184,49 +184,81 @@ CRITICAL INSTRUCTIONS - YOU MUST FOLLOW THESE STRICTLY:
      * Your interpretation or application to modern context (label it as such)
    - Never make claims about verses not provided in the context above
 
-3. CONTENT REQUIREMENTS:
-   Your task: Provide comprehensive, high-quality guidance in THREE detailed sections. Make it relevant to modern life, especially for younger generations facing digital age challenges.
+3. LANGUAGE & TONE REQUIREMENTS:
+   - Use UNIVERSAL, INCLUSIVE spiritual language that appeals to all backgrounds
+   - Use terms like "God Consciousness," "Divine Consciousness," "Supreme Consciousness" instead of sectarian terms
+   - Refer to "the Supreme," "the Divine," "God" in a way that's accessible to all faiths
+   - Use universal concepts like "self-realization," "spiritual growth," "divine purpose"
+   - Write in Prabhupada's inclusive style from "Science of Self Realization" - making ancient wisdom accessible to modern, diverse audiences
+   - Avoid overly sectarian language while maintaining the essence of the teachings
+   - Make it feel welcoming to people of all religious backgrounds or no religious background
+   - Focus on universal spiritual principles that everyone can relate to
+
+4. CONTENT REQUIREMENTS:
+   Your task: Provide comprehensive, high-quality guidance in THREE detailed sections. This guidance serves diverse seekers including students, professionals, individuals, families, and corporate employees - addressing both spiritual and practical life challenges. Make it relevant to modern life, especially for younger generations facing digital age challenges. Write in a way that appeals to a wide, diverse audience seeking both spiritual growth and practical solutions.
 
    A. ANALYSIS (500+ words):
       - Use clear section headers with ## for main topics and ### for subtopics
-      - Explain how the PROVIDED verses address this specific problem
+      - Explain how the PROVIDED verses address this specific problem using UNIVERSAL language (both spiritual and practical)
+      - Frame teachings in terms that apply to different contexts: academic (students), professional (corporate employees, professionals), personal (individuals), and family life
+      - Use inclusive spiritual language like "God Consciousness," "Divine principles," "spiritual wisdom" when relevant, but also provide practical, actionable insights
       - Quote specific translations and purports from the verses above using > blockquotes (text only, no quotes inside)
       - Reference specific verses by ID (e.g., **BG 2.12**, **BG 3.30**) in bold and explain their relevance
-      - Explain the core principles as described in the purports
-      - Connect the verse teachings to modern context (mention Gen Z/Gen Alpha challenges if relevant)
-      - Show how these principles apply to contemporary situations
+      - Explain the core principles as described in the purports, using inclusive language
+      - Connect the verse teachings to modern context across different life situations (academic, professional, personal, family)
+      - Show how these universal principles apply to contemporary situations for students, professionals, individuals, families, and corporate employees
       - Base all explanations on the actual verse content provided
+      - Use language that makes ancient wisdom accessible to modern, diverse audiences seeking both spiritual and practical guidance
       - Use bullet points (-) for lists and numbered lists (1., 2., 3.) for steps
       - Add line breaks between paragraphs for readability
 
    B. PRACTICAL GUIDANCE (500+ words):
       - Use clear section headers with ## for main topics
-      - Provide specific, actionable steps based on the Gita principles from the verses above
+      - Provide specific, actionable steps based on the universal principles from the verses above
+      - Offer guidance that applies to different contexts: students (academic, career planning), professionals (work-life balance, leadership), individuals (personal growth), families (relationships, parenting), and corporate employees (teamwork, ethics, decision-making)
+      - Frame guidance in terms that resonate with all seekers - both spiritual concepts (when relevant) and practical life principles
       - Use numbered lists (1., 2., 3.) for sequential steps
       - Use bullet points (-) for options or parallel items
       - Address the modern context mentioned in the query
-      - Include immediate actions the person can take
+      - Include immediate actions the person can take in their specific role (student, professional, family member, employee, etc.)
       - Reference specific verses and their teachings using **bold verse IDs**
-      - Recommend practices based on what the verses actually say
-      - Make it practical and applicable to daily life
+      - Recommend practices based on what the verses actually say, making them applicable to various life situations
+      - Make it practical and applicable to daily life for people of all backgrounds and roles
       - Consider digital age challenges if relevant
+      - Write in a way that makes the principles accessible to everyone, whether they seek spiritual growth, practical solutions, or both
       - Add spacing between sections for readability
 
-   C. SPIRITUAL EXERCISES (500+ words) - REQUIRED SECTION:
-      - CRITICAL: You MUST include this section. Start with "## C. SPIRITUAL EXERCISES" or "## Spiritual Exercises"
+   C. PRACTICAL EXERCISES & PRACTICES (500+ words) - REQUIRED SECTION:
+      - CRITICAL: You MUST include this section. Start with "## C. PRACTICAL EXERCISES & PRACTICES" or "## Practical Exercises & Practices"
       - Use clear section headers with ## for main topics
-      - Suggest 5-7 specific exercises, meditations, or practices
+      - Suggest 5-7 specific exercises, practices, or activities that can be applied by different types of seekers (students, professionals, individuals, families, corporate employees)
+      - IMPORTANT: Include practices based on Srila Prabhupada's teachings:
+        * Early morning spiritual practice (rising early, morning meditation/prayer/chanting) - present this universally
+        * The Hare Krishna maha mantra SHOULD be explicitly mentioned as it is important - you can present it as: "The Hare Krishna maha mantra (Hare Krishna, Hare Krishna, Krishna Krishna, Hare Hare / Hare Rama, Hare Rama, Rama Rama, Hare Hare) is recommended by Srila Prabhupada as a powerful practice for spiritual growth and God Consciousness"
+        * Also provide generic/universal guidance based on Prabhupada's general teachings (e.g., "sacred sound meditation," "divine name meditation," "spiritual vibration practice") for those who prefer more universal language
+        * Balance between being explicit about the Hare Krishna maha mantra (which is important) and providing generic alternatives
+      - Include both spiritual practices (when relevant) and practical exercises for personal and professional growth
+      - Frame exercises in universal terms that appeal to all - from spiritual growth to practical skill development
+      - When including Prabhupada's practices:
+        * Explicitly mention the Hare Krishna maha mantra with its full form
+        * Also provide generic alternatives like "connecting with the Divine through sound," "early morning spiritual discipline," "sacred vibration meditation" for broader appeal
+        * Explain that chanting sacred mantras (including the Hare Krishna maha mantra) is a universal practice for spiritual growth
       - Number each exercise (1., 2., 3., etc.) with clear titles like "### Exercise 1: [Title]"
-      - Base them EXCLUSIVELY on the verses provided above
+      - Base them on the verses provided above AND on spiritual practices recommended by Srila Prabhupada (explicitly mention the Hare Krishna maha mantra, and also provide generic guidance)
       - Reference which verse(s) each exercise is based on using **bold verse IDs**
-      - Make them practical and applicable to modern life
-      - Include daily practices, weekly reflections, and long-term cultivation
+      - Make them practical and applicable to modern life for people of all backgrounds and roles
+      - Include daily practices (like early morning routine, meditation/chanting - mention the Hare Krishna maha mantra explicitly), weekly reflections, and long-term cultivation suitable for different life contexts
       - Provide step-by-step instructions where helpful using sub-bullets
-      - Consider modern lifestyle constraints
+      - Consider modern lifestyle constraints and different schedules (student life, corporate work, family responsibilities)
+      - Use inclusive language that makes practices accessible to everyone, whether they seek spiritual growth, practical solutions, or both
+      - When describing chanting practices:
+        * Explicitly mention the Hare Krishna maha mantra as recommended by Srila Prabhupada
+        * Also provide generic alternatives like "sacred sound meditation," "divine name meditation," or "spiritual vibration practice" for those who prefer universal language
+        * Explain that these practices help develop God Consciousness and spiritual growth
       - Add spacing between exercises for readability
       - DO NOT skip this section - it is mandatory
 
-4. FORMATTING REQUIREMENTS:
+5. FORMATTING REQUIREMENTS:
    - Use proper markdown formatting for premium appearance:
      * ## for main section headers
      * ### for subsection headers
@@ -423,7 +455,7 @@ Based on the verses referenced above, here are practical spiritual exercises you
         else:
             exercises_section = exercises
         
-        final_answer = f"""# 🕉️ Guidance from Bhagavad Gita
+        final_answer = f"""# 🕉️ Guidance for Modern Life
 
 ---
 
@@ -445,7 +477,7 @@ Based on the verses referenced above, here are practical spiritual exercises you
 
 ---
 
-## 🧘 Spiritual Exercises
+## 🧘 Practical Exercises & Practices
 
 {exercises_section}
 
