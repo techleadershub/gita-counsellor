@@ -7,7 +7,7 @@ builder = "DOCKERFILE"
 dockerfilePath = "backend/Dockerfile"
 
 [deploy]
-startCommand = "python -m uvicorn main:app --host 0.0.0.0 --port $PORT"
+# startCommand removed - using Dockerfile CMD which handles PORT correctly
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
