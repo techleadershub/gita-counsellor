@@ -46,7 +46,7 @@ function App() {
               </div>
               <div className="flex flex-col">
                 <h1 className="text-2xl font-bold text-gray-900 tracking-tight font-sans leading-none">Gita Counsellor</h1>
-                <span className="text-[10px] text-nebula-600 font-bold tracking-[0.2em] uppercase mt-1 hidden sm:block">Cosmic Wisdom</span>
+                <span className="text-[10px] text-nebula-600 font-bold tracking-[0.2em] uppercase mt-1 hidden sm:block">The Life Manual</span>
               </div>
             </div>
 
