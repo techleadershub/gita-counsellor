@@ -73,7 +73,16 @@ async def research_with_progress(request: ResearchRequest):
     
     def progress_callback(progress_data):
         """Callback to emit progress updates (called from sync context)."""
-        progress_queue.put(progress_data)
+        try:
+            # Queue.put() is blocking but unbounded queue won't block
+            # Add timeout to prevent indefinite blocking (defensive)
+            progress_queue.put(progress_data, block=True, timeout=5.0)
+        except thread_queue.Full:
+            # Queue is full (shouldn't happen with unbounded queue, but be safe)
+            logging.warning("Progress queue full, dropping progress update")
+        except Exception as e:
+            # Don't let progress callback errors crash the research
+            logging.error(f"Error putting progress data in queue: {e}")
     
     async def run_research():
         try:
@@ -122,34 +131,53 @@ async def research_with_progress(request: ResearchRequest):
     async def event_generator():
         try:
             while True:
-                # Check if research task is done (client might have disconnected)
-                if research_task.done():
-                    # If task completed but queue is empty, something went wrong
-                    if progress_queue.empty():
-                        try:
-                            # Check if there was an exception
-                            research_task.result()
-                        except Exception as e:
-                            yield f"data: {json.dumps({'step': 'error', 'message': str(e), 'details': {}})}\n\n"
-                        break
-                
                 try:
-                    # Check queue with timeout
+                    # Check queue with timeout first (before checking task status)
+                    # This ensures we read "completed" message even if task is done
                     try:
                         progress_data = progress_queue.get(timeout=0.5)
                     except thread_queue.Empty:
-                        # Send heartbeat to keep connection alive
-                        yield f": heartbeat\n\n"
+                        # Queue is empty, check if task is done
+                        if research_task.done():
+                            # Task completed but no message in queue - check for exception
+                            try:
+                                research_task.result()
+                                # Task completed successfully but no completion message
+                                # This shouldn't happen, but handle gracefully
+                                yield f"data: {json.dumps({'step': 'error', 'message': 'Research completed unexpectedly', 'details': {}})}\n\n"
+                            except Exception as e:
+                                yield f"data: {json.dumps({'step': 'error', 'message': str(e), 'details': {}})}\n\n"
+                        else:
+                            # Send heartbeat to keep connection alive
+                            yield f": heartbeat\n\n"
                         continue
                     
+                    # Process the progress data
+                    try:
+                        # Ensure progress_data is serializable
+                        serialized_data = {
+                            "step": str(progress_data.get("step", "unknown")),
+                            "message": str(progress_data.get("message", "")),
+                            "details": progress_data.get("details", {})
+                        }
+                        json_str = json.dumps(serialized_data)
+                    except (TypeError, ValueError) as e:
+                        logging.error(f"Error serializing progress data: {e}")
+                        # Send a safe error message
+                        json_str = json.dumps({
+                            "step": "error",
+                            "message": "Error serializing progress data",
+                            "details": {}
+                        })
+                    
                     if progress_data["step"] == "completed":
-                        yield f"data: {json.dumps(progress_data)}\n\n"
+                        yield f"data: {json_str}\n\n"
                         break
                     elif progress_data["step"] == "error":
-                        yield f"data: {json.dumps(progress_data)}\n\n"
+                        yield f"data: {json_str}\n\n"
                         break
                     else:
-                        yield f"data: {json.dumps(progress_data)}\n\n"
+                        yield f"data: {json_str}\n\n"
                 except Exception as e:
                     logging.error(f"Event generator error: {e}", exc_info=True)
                     yield f"data: {json.dumps({'step': 'error', 'message': str(e), 'details': {}})}\n\n"

@@ -36,7 +36,7 @@ function ResearchView() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!query.trim()) return;
+    if (!query.trim() || loading) return; // Prevent multiple submissions
 
     setLoading(true);
     setError(null);

@@ -67,6 +67,7 @@ export default function ResearchProgress({ query, context, onComplete, onError }
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
+        const MAX_BUFFER_SIZE = 1024 * 1024; // 1MB max buffer size
 
         function readStream() {
           if (!isActive) return;
@@ -76,6 +77,14 @@ export default function ResearchProgress({ query, context, onComplete, onError }
               if (!isCompleteRef.current) {
                 onErrorRef.current?.(new Error('Stream ended unexpectedly'));
               }
+              return;
+            }
+
+            // Prevent buffer overflow
+            if (buffer.length > MAX_BUFFER_SIZE) {
+              console.error('Buffer overflow detected, resetting buffer');
+              buffer = '';
+              onErrorRef.current?.(new Error('Stream buffer overflow'));
               return;
             }
 
@@ -91,9 +100,15 @@ export default function ResearchProgress({ query, context, onComplete, onError }
               if (line.startsWith('data: ')) {
                 try {
                   const data = JSON.parse(line.slice(6));
-                  handleProgress(data);
+                  // Validate required fields
+                  if (data && typeof data === 'object' && 'step' in data) {
+                    handleProgress(data);
+                  } else {
+                    console.warn('Invalid progress data format:', data);
+                  }
                 } catch (e) {
                   console.error('Error parsing SSE data:', e, line);
+                  // Continue processing other lines
                 }
               }
             }
@@ -125,25 +140,37 @@ export default function ResearchProgress({ query, context, onComplete, onError }
     function handleProgress(data) {
       if (!isActive) return;
       
-      const { step, message, details } = data;
+      // Validate and safely extract data
+      const step = data?.step || 'unknown';
+      const message = data?.message || '';
+      const details = data?.details || {};
       
       setCurrentStep(step);
       setMessage(message);
       setDetails(details);
 
-      // Add to steps history
-      setSteps(prev => [...prev, { step, message, details, timestamp: Date.now() }]);
+      // Add to steps history (limit to prevent memory issues)
+      setSteps(prev => {
+        const newSteps = [...prev, { step, message, details, timestamp: Date.now() }];
+        // Keep only last 50 steps to prevent memory issues
+        return newSteps.slice(-50);
+      });
 
       if (step === 'completed') {
         isCompleteRef.current = true;
         setIsComplete(true);
         isActive = false;
-        onCompleteRef.current?.(details);
+        // Validate details before calling onComplete
+        if (details && typeof details === 'object') {
+          onCompleteRef.current?.(details);
+        } else {
+          onErrorRef.current?.(new Error('Invalid completion data'));
+        }
       } else if (step === 'error') {
         isCompleteRef.current = true;
         setIsComplete(true);
         isActive = false;
-        onErrorRef.current?.(new Error(message));
+        onErrorRef.current?.(new Error(message || 'Unknown error occurred'));
       }
     }
 
@@ -151,6 +178,8 @@ export default function ResearchProgress({ query, context, onComplete, onError }
       isActive = false;
       isCompleteRef.current = false;
       controller.abort();
+      // Note: reader will be automatically released when AbortController aborts
+      // The stream will be cancelled and resources cleaned up
     };
   }, [query, context]);
 

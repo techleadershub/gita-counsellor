@@ -46,11 +46,31 @@ class ResearchAgent:
     def emit_progress(self, step: str, message: str, details: dict = None):
         """Emit progress update for frontend visualization."""
         if self.progress_callback:
-            self.progress_callback({
-                "step": step,
-                "message": message,
-                "details": details or {}
-            })
+            try:
+                # Ensure details is JSON-serializable
+                safe_details = {}
+                if details:
+                    for key, value in details.items():
+                        # Convert non-serializable types
+                        if isinstance(value, (list, dict, str, int, float, bool, type(None))):
+                            # Recursively check nested structures
+                            if isinstance(value, list):
+                                safe_details[key] = [str(v) if not isinstance(v, (str, int, float, bool, type(None))) else v for v in value]
+                            elif isinstance(value, dict):
+                                safe_details[key] = {k: str(v) if not isinstance(v, (str, int, float, bool, type(None))) else v for k, v in value.items()}
+                            else:
+                                safe_details[key] = value
+                        else:
+                            safe_details[key] = str(value)
+                
+                self.progress_callback({
+                    "step": step,
+                    "message": message,
+                    "details": safe_details
+                })
+            except Exception as e:
+                # Don't let progress callback errors crash the research
+                self.log(f"Error emitting progress: {e}")
 
     # --- Nodes ---
     
@@ -109,6 +129,12 @@ Make questions specific and focused. Return ONLY the questions, one per line, no
         questions = state["research_questions"]
         all_verses = []
         
+        # Handle empty questions list
+        if not questions:
+            self.log("No research questions generated")
+            self.emit_progress("verses_found", "No research questions to search", {"count": 0})
+            return {"relevant_verses": []}
+        
         self.log(f"Researching {len(questions)} questions...")
         self.emit_progress("researching", f"Searching through {len(questions)} research questions in the Bhagavad Gita...", {"total": len(questions), "current": 0})
         
@@ -116,24 +142,32 @@ Make questions specific and focused. Return ONLY the questions, one per line, no
             self.log(f"  [{i}/{len(questions)}] Searching: {question}")
             self.emit_progress("searching_verse", f"Searching: {question[:60]}...", {"current": i, "total": len(questions), "question": question})
             
-            # Search vector store
-            results = self.vector_store.search(question, limit=5)
-            self.log(f"    Found {len(results)} relevant verses")
+            # Search vector store with error handling
+            try:
+                results = self.vector_store.search(question, limit=5)
+                self.log(f"    Found {len(results)} relevant verses")
+            except Exception as e:
+                self.log(f"    Error searching for question: {e}")
+                continue  # Skip this question and continue with next
             
             # Get full verse details from SQLite
             db_session = get_db_session()
             try:
                 for result in results:
-                    # Try multiple ways to get verse_id (from direct field or from chunk payload)
-                    verse_id = result.get("verse_id", "") or result.get("chunk", {}).get("verse_id", "")
-                    
-                    if verse_id:
-                        verse = db_session.query(Verse).filter_by(verse_id=verse_id).first()
-                        if verse:
-                            verse_dict = verse.to_dict()
-                            verse_dict["relevance_score"] = result.get("score", 0)
-                            verse_dict["research_question"] = question
-                            all_verses.append(verse_dict)
+                    try:
+                        # Try multiple ways to get verse_id (from direct field or from chunk payload)
+                        verse_id = result.get("verse_id", "") or result.get("chunk", {}).get("verse_id", "")
+                        
+                        if verse_id:
+                            verse = db_session.query(Verse).filter_by(verse_id=verse_id).first()
+                            if verse:
+                                verse_dict = verse.to_dict()
+                                verse_dict["relevance_score"] = result.get("score", 0)
+                                verse_dict["research_question"] = question
+                                all_verses.append(verse_dict)
+                    except Exception as e:
+                        self.log(f"    Error processing verse result: {e}")
+                        continue  # Skip this result and continue
             finally:
                 db_session.close()
         
