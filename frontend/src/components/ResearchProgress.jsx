@@ -252,28 +252,28 @@ export default function ResearchProgress({ query, context, onComplete, onError }
   const currentStepIndex = allSteps.indexOf(currentStep || 'analyzing');
 
   return (
-    <div className="glass-panel rounded-2xl p-6 sm:p-8 mb-8 animate-fade-in shadow-xl shadow-nebula-100/50">
-      <h3 className="text-xl font-bold text-gray-900 mb-6 font-serif">Research Progress</h3>
+    <div className="glass-panel rounded-2xl p-4 sm:p-8 mb-6 sm:mb-8 animate-fade-in shadow-xl shadow-nebula-100/50">
+      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 font-serif">Research Progress</h3>
 
       {/* Current Step */}
-      <div className="mb-8">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-nebula-100 to-nebula-200 flex items-center justify-center text-nebula-700 shadow-sm border border-nebula-200">
+      <div className="mb-6 sm:mb-8">
+        <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-nebula-100 to-nebula-200 flex items-center justify-center text-nebula-700 shadow-sm border border-nebula-200">
             {(() => {
               const Icon = stepIcons[currentStep] || Loader2;
-              return <Icon className={`w-6 h-6 ${!stepIcons[currentStep] ? 'animate-spin' : ''}`} />;
+              return <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${!stepIcons[currentStep] ? 'animate-spin' : ''}`} />;
             })()}
           </div>
           <div className="flex-1">
-            <h4 className="font-bold text-lg text-gray-900">
+            <h4 className="font-bold text-base sm:text-lg text-gray-900 leading-tight">
               {stepLabels[currentStep] || 'Processing...'}
             </h4>
-            <p className="text-sm text-gray-600 mt-1">{message}</p>
+            <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1 leading-snug">{message}</p>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-starlight-200 rounded-full h-3 mt-4 overflow-hidden">
+        <div className="w-full bg-starlight-200 rounded-full h-2 sm:h-3 mt-3 sm:mt-4 overflow-hidden">
           <div
             className="bg-gradient-to-r from-nebula-500 to-nebula-600 h-full rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(139,92,246,0.5)]"
             style={{
@@ -286,7 +286,7 @@ export default function ResearchProgress({ query, context, onComplete, onError }
       </div>
 
       {/* Step Timeline */}
-      <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+      <div className="space-y-3 sm:space-y-4 max-h-[300px] sm:max-h-[400px] overflow-y-auto pr-1 sm:pr-2 custom-scrollbar">
         {allSteps.map((step, index) => {
           const isActive = step === currentStep;
           const isCompleted = currentStepIndex > index || isComplete;
@@ -294,21 +294,21 @@ export default function ResearchProgress({ query, context, onComplete, onError }
           const StepIcon = stepIcons[step] || Loader2;
 
           return (
-            <div key={step} className={`flex items-start gap-4 p-3 rounded-lg transition-colors ${isActive ? 'bg-nebula-50/50 border border-nebula-100' : ''}`}>
+            <div key={step} className={`flex items-start gap-3 sm:gap-4 p-2.5 sm:p-3 rounded-lg transition-colors ${isActive ? 'bg-nebula-50/50 border border-nebula-100' : ''}`}>
               <div
-                className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all border ${isCompleted
+                className={`flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-[10px] sm:text-xs transition-all border ${isCompleted
                   ? 'bg-nebula-600 text-white border-nebula-600 shadow-md shadow-nebula-500/30'
                   : isActive
                     ? 'bg-white text-nebula-600 border-nebula-400 animate-pulse-slow shadow-[0_0_8px_rgba(139,92,246,0.4)]'
                     : 'bg-starlight-100 text-gray-400 border-starlight-200'
                   }`}
               >
-                {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : index + 1}
+                {isCompleted ? <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" /> : index + 1}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className={`text-sm ${isCompleted || isActive ? 'text-nebula-700' : 'text-gray-400'}`}>
-                    <StepIcon className="w-4 h-4" />
+                    <StepIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </span>
                   <span
                     className={`font-medium text-sm sm:text-base truncate ${isActive ? 'text-nebula-900' : isCompleted ? 'text-gray-700' : 'text-gray-400'
@@ -318,27 +318,29 @@ export default function ResearchProgress({ query, context, onComplete, onError }
                   </span>
                 </div>
                 {stepData && (
-                  <p className="text-xs text-gray-500 mt-1 pl-7">{stepData.message}</p>
+                  <p className="text-xs text-gray-500 mt-1 pl-6 sm:pl-7 leading-snug">{stepData.message}</p>
                 )}
-                {step === 'questions_generated' && details.count && (
-                  <p className="text-xs text-nebula-600 mt-1 pl-7 font-medium">
-                    Generated {details.count} research questions
+                {/* Details sections shortened for mobile readability if needed, keeping same structure but checking padding */}
+                {(step === 'questions_generated' || step === 'verses_found' || step === 'searching_purports' || step === 'purports_found' || (step === 'searching_verse' && details.total)) && details.count !== undefined && (
+                  <p className="text-xs text-nebula-600 mt-1 pl-6 sm:pl-7 font-medium">
+                    {step === 'questions_generated' && `Generated ${details.count} layout questions`}
+                    {step === 'verses_found' && `Found ${details.count} relevant verses`}
+                    {step === 'searching_verse' && `Question ${details.current} of ${details.total}`}
+                    {step === 'purports_found' && `Found ${details.count} additional verses`}
                   </p>
                 )}
-                {step === 'verses_found' && details.count && (
-                  <p className="text-xs text-nebula-600 mt-1 pl-7 font-medium">
-                    Found {details.count} relevant verses
-                  </p>
+                {/* Re-implementing the individual checks to match original logic but compacted */}
+                {step === 'questions_generated' && details.count && !stepData && (
+                  <p className="text-xs text-nebula-600 mt-1 pl-6 sm:pl-7 font-medium">Generated {details.count} research questions</p>
                 )}
-                {step === 'searching_verse' && details.current && details.total && (
-                  <p className="text-xs text-nebula-600 mt-1 pl-7 font-medium">
-                    Question {details.current} of {details.total}
-                  </p>
+                {step === 'verses_found' && details.count && !stepData && (
+                  <p className="text-xs text-nebula-600 mt-1 pl-6 sm:pl-7 font-medium">Found {details.count} relevant verses</p>
                 )}
-                {step === 'purports_found' && details.count && (
-                  <p className="text-xs text-nebula-600 mt-1 pl-7 font-medium">
-                    Found {details.count} additional verses from purports
-                  </p>
+                {step === 'searching_verse' && details.current && !stepData && (
+                  <p className="text-xs text-nebula-600 mt-1 pl-6 sm:pl-7 font-medium">Question {details.current} of {details.total}</p>
+                )}
+                {step === 'purports_found' && details.count && !stepData && (
+                  <p className="text-xs text-nebula-600 mt-1 pl-6 sm:pl-7 font-medium">Found {details.count} verses from purports</p>
                 )}
               </div>
             </div>
@@ -348,19 +350,19 @@ export default function ResearchProgress({ query, context, onComplete, onError }
 
       {/* Research Questions Preview */}
       {details.questions && details.questions.length > 0 && (
-        <div className="mt-8 p-6 bg-white/60 rounded-xl border border-nebula-100 shadow-inner">
-          <h4 className="font-bold text-nebula-900 mb-3 font-serif flex items-center gap-2">
-            <MessageSquare className="w-5 h-5" /> Research Questions Generated
+        <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-white/60 rounded-xl border border-nebula-100 shadow-inner">
+          <h4 className="font-bold text-sm sm:text-base text-nebula-900 mb-2 sm:mb-3 font-serif flex items-center gap-2">
+            <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5" /> Research Questions Generated
           </h4>
-          <ul className="space-y-3">
+          <ul className="space-y-2 sm:space-y-3">
             {details.questions.slice(0, 3).map((q, idx) => (
-              <li key={idx} className="flex items-start gap-3 text-sm text-gray-700 bg-white p-3 rounded-lg border border-starlight-100 shadow-sm">
+              <li key={idx} className="flex items-start gap-2.5 sm:gap-3 text-xs sm:text-sm text-gray-700 bg-white p-2.5 sm:p-3 rounded-lg border border-starlight-100 shadow-sm leading-relaxed">
                 <span className="text-nebula-400 mt-0.5">•</span>
                 <span>{q}</span>
               </li>
             ))}
             {details.questions.length > 3 && (
-              <li className="text-nebula-600 text-sm font-medium italic pl-2">...and {details.questions.length - 3} more questions</li>
+              <li className="text-nebula-600 text-xs sm:text-sm font-medium italic pl-2">...and {details.questions.length - 3} more questions</li>
             )}
           </ul>
         </div>

@@ -3,6 +3,15 @@
 @tailwind utilities;
 
 @layer utilities {
+  .animate-slide-left {
+    animation: slide-left 0.3s ease-out forwards;
+  }
+  
+  @keyframes slide-left {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
   .glass-panel {
     @apply bg-white/60 backdrop-blur-xl border border-white/40 shadow-glass;
   }
@@ -32,9 +41,17 @@ body {
 }
 
 /* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+@media (min-width: 640px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+}
+@media (max-width: 639px) {
+  ::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
 }
 
 ::-webkit-scrollbar-track {
@@ -87,7 +104,7 @@ code {
 }
 
 .prose blockquote {
-  @apply border-l-4 border-nebula-400 pl-4 italic text-gray-700 my-4 bg-nebula-50 py-2 rounded-r;
+  @apply border-l-4 border-nebula-400 pl-4 italic text-gray-700 my-4;
 }
 
 .prose ul, .prose ol {

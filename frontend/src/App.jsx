@@ -13,11 +13,16 @@ import {
   MessageCircle,
   Feather,
   Brain,
-  Info
+  Info,
+  Menu,
+  X,
+  ExternalLink,
+  Target
 } from 'lucide-react';
 
 function App() {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,29 +42,127 @@ function App() {
           radial-gradient(at 100% 0%, rgba(245, 158, 11, 0.1) 0px, transparent 50%)`
       }}></div>
 
-      <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'glass-nav py-3' : 'bg-transparent py-5'}`}>
+      <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'glass-nav py-2.5 sm:py-3' : 'bg-transparent py-3 sm:py-5'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-nebula-500/10 to-nebula-500/5 rounded-xl flex items-center justify-center border border-nebula-100 shadow-sm transform rotate-0 group transition-all hover:scale-105">
-                <img src="/logo.svg" alt="Gita Counsellor Logo" className="w-8 h-8 drop-shadow-sm" />
+            {/* Logo Section */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-nebula-500/10 to-nebula-500/5 rounded-xl flex items-center justify-center border border-nebula-100 shadow-sm transform rotate-0 group transition-all hover:scale-105">
+                <img src="/logo.svg" alt="Gita Counsellor Logo" className="w-6 h-6 sm:w-8 sm:h-8 drop-shadow-sm" />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-2xl font-bold text-gray-900 tracking-tight font-sans leading-none">Gita Counsellor</h1>
-                <span className="text-[10px] text-nebula-600 font-bold tracking-[0.2em] uppercase mt-1 hidden sm:block">The Life Manual</span>
+                <h1 className="text-lg sm:text-2xl font-bold text-gray-900 tracking-tight font-sans leading-none">Gita Counsellor</h1>
+                <span className="text-[9px] sm:text-[10px] text-nebula-600 font-bold tracking-[0.2em] uppercase mt-0.5 sm:mt-1 hidden sm:block">The Life Manual</span>
               </div>
             </div>
 
-            <a href="https://github.com/techleadershub/gita-counsellor" target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-nebula-600 transition-colors px-4 py-2 rounded-full hover:bg-starlight-100/50">
-              <Github className="w-4 h-4 fill-current" />
-              <span className="hidden sm:inline">About Project</span>
-            </a>
+            {/* Desktop Navigation */}
+            <div className="hidden sm:flex items-center gap-4">
+              <button
+                onClick={() => window.location.reload()}
+                className="text-sm font-medium text-gray-600 hover:text-nebula-600 transition-colors"
+              >
+                New Chat
+              </button>
+              <a href="https://ramayanacounsellor.futureproofindia.com/" target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-nebula-600 transition-colors px-4 py-2 rounded-full hover:bg-starlight-100/50">
+                <ExternalLink className="w-4 h-4" />
+                <span>Ramayana Counsellor</span>
+              </a>
+              <a href="https://github.com/techleadershub/gita-counsellor" target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-nebula-600 transition-colors px-4 py-2 rounded-full hover:bg-starlight-100/50">
+                <Github className="w-4 h-4 fill-current" />
+                <span>About Project</span>
+              </a>
+            </div>
+
+            {/* Mobile Hamburger Button */}
+            <button
+              className="sm:hidden p-2 text-gray-600 hover:text-nebula-600 transition-colors"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Menu className="w-6 h-6" />
+            </button>
           </div>
         </div>
       </nav>
 
-      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16">
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-[60] sm:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/20 backdrop-blur-sm animate-fade-in"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+
+          {/* Menu Drawer */}
+          <div className="absolute right-0 top-0 bottom-0 w-[280px] bg-white shadow-2xl animate-slide-left p-6 flex flex-col">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-xl font-bold text-nebula-900 font-serif">Menu</h2>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6 flex-1">
+              <button
+                onClick={() => {
+                  window.location.reload();
+                  setMobileMenuOpen(false);
+                }}
+                className="flex items-center gap-3 text-lg font-medium text-gray-800 w-full p-2 rounded-lg hover:bg-starlight-50 active:bg-starlight-100 transition-colors"
+              >
+                <MessageCircle className="w-5 h-5 text-nebula-500" />
+                New Chat
+              </button>
+
+              <a
+                href="https://ramayanacounsellor.futureproofindia.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 text-lg font-medium text-gray-800 w-full p-2 rounded-lg hover:bg-starlight-50 active:bg-starlight-100 transition-colors"
+              >
+                <ExternalLink className="w-5 h-5 text-nebula-500" />
+                Ramayana Counsellor
+              </a>
+
+              <a
+                href="https://github.com/techleadershub/gita-counsellor"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 text-lg font-medium text-gray-800 w-full p-2 rounded-lg hover:bg-starlight-50 active:bg-starlight-100 transition-colors"
+              >
+                <Github className="w-5 h-5 text-nebula-500" />
+                About Project
+              </a>
+
+              <a
+                href="https://www.linkedin.com/in/sridharjammalamadaka/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 text-lg font-medium text-gray-800 w-full p-2 rounded-lg hover:bg-starlight-50 active:bg-starlight-100 transition-colors"
+              >
+                <Info className="w-5 h-5 text-nebula-500" />
+                Developer
+              </a>
+            </div>
+
+            <div className="pt-6 border-t border-gray-100">
+              <p className="text-xs text-center text-gray-400">
+                Gita Counsellor v1.0
+                <br />
+                The Life Manual
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <main className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-32 pb-36 sm:pb-16">
         <ResearchView />
       </main>
 
@@ -89,7 +192,7 @@ function ResearchView() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('answer');
+  const [activeTab, setActiveTab] = useState('analysis');
   const [showProgress, setShowProgress] = useState(false);
   const [currentQuery, setCurrentQuery] = useState('');
 
@@ -108,7 +211,7 @@ function ResearchView() {
 
   const handleProgressComplete = (data) => {
     setResult(data);
-    setActiveTab('answer');
+    setActiveTab('analysis');
     setShowProgress(false);
     setLoading(false);
   };
@@ -120,9 +223,8 @@ function ResearchView() {
   };
 
   const tabs = [
-    { id: 'answer', label: 'Divine Guidance', icon: Sparkles, color: 'text-amber-500', bg: 'bg-amber-50' },
     { id: 'analysis', label: 'Deep Analysis', icon: Brain, color: 'text-blue-500', bg: 'bg-blue-50' },
-    { id: 'guidance', label: 'Action Plan', icon: Compass, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+    { id: 'guidance', label: 'Action Plan', icon: Target, color: 'text-emerald-500', bg: 'bg-emerald-50' },
     { id: 'exercises', label: 'Practices', icon: Flower2, color: 'text-rose-500', bg: 'bg-rose-50' },
     { id: 'verses', label: `Verses`, count: result?.verses?.length, icon: ScrollText, color: 'text-nebula-600', bg: 'bg-nebula-50' },
   ];
@@ -130,19 +232,19 @@ function ResearchView() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Hero / Input Section */}
-      <div className={`transition-all duration-700 ease-in-out ${result ? '' : 'max-w-3xl mx-auto mt-8 sm:mt-16'}`}>
+      <div className={`transition-all duration-700 ease-in-out ${result ? '' : 'max-w-3xl mx-auto mt-4 sm:mt-16'}`}>
         {!result && (
-          <div className="text-center mb-12">
-            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6 font-serif leading-tight">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 font-serif leading-tight">
               Seek Guidance from <br className="hidden sm:block" />
-              <span className="relative inline-block mt-2">
+              <span className="relative inline-block mt-1 sm:mt-2">
                 <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-nebula-600 to-nebula-400">The Bhagavad Gita</span>
-                <svg className="absolute -bottom-2 left-0 w-full h-3 text-nebula-200 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
+                <svg className="absolute -bottom-1 sm:-bottom-2 left-0 w-full h-2 sm:h-3 text-nebula-200 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
                   <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="8" fill="none" />
                 </svg>
               </span>
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0">
               Facing a dilemma? Describe your situation and receive personalized wisdom drawn from the eternal verses.
             </p>
           </div>
@@ -153,14 +255,14 @@ function ResearchView() {
             <form onSubmit={handleSubmit} className="p-1">
               <div className="space-y-1">
                 <div className="relative group">
-                  <div className="absolute top-6 left-5 text-gray-400 group-focus-within:text-nebula-500 transition-colors">
-                    <Search className="w-6 h-6" />
+                  <div className="absolute top-4 sm:top-6 left-4 sm:left-5 text-gray-400 group-focus-within:text-nebula-500 transition-colors">
+                    <Search className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                   <textarea
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="What is troubling you today?"
-                    className="w-full pl-14 pr-5 py-5 bg-transparent border-none focus:ring-0 text-xl text-gray-800 placeholder-gray-300 resize-none font-serif leading-relaxed"
+                    className="w-full pl-11 sm:pl-14 pr-4 sm:pr-5 py-3 sm:py-5 bg-transparent border-none focus:ring-0 text-lg sm:text-xl text-gray-800 placeholder-gray-300 resize-none font-serif leading-relaxed"
                     rows={result ? 1 : 2}
                     required
                     onKeyDown={(e) => {
@@ -233,13 +335,14 @@ function ResearchView() {
         </div>
       )}
 
-      {result && (
+      {result && (<>
         <div className="animate-slide-up space-y-8">
           {/* Tabs Navigation */}
-          <div className="sticky top-20 z-40 bg-starlight-50/95 backdrop-blur-md shadow-sm border-y border-starlight-200 -mx-4 sm:mx-0 sm:rounded-2xl sm:border px-2 py-2">
+          {/* Tabs Navigation (Desktop) */}
+          <div className="hidden sm:block sticky top-20 z-40 bg-starlight-50/95 backdrop-blur-md shadow-sm border-y border-starlight-200 rounded-2xl border px-2 py-2">
             <div
               ref={tabsContainerRef}
-              className="flex overflow-x-auto hide-scrollbar sm:justify-center gap-1 snap-x p-1"
+              className="flex justify-center gap-1 snap-x p-1"
             >
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -266,8 +369,10 @@ function ResearchView() {
             </div>
           </div>
 
+
+
           {/* Content Area */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-12 min-h-[500px] relative overflow-hidden">
+          <div className="glass-panel rounded-3xl p-6 sm:p-12 min-h-[500px] relative overflow-hidden mb-24 sm:mb-0">
             {/* Background Texture */}
             <div className="absolute top-0 right-0 p-12 opacity-[0.02] pointer-events-none">
               <Flower2 className="w-96 h-96" />
@@ -288,23 +393,19 @@ function ResearchView() {
                     </div>
                   </div>
 
-                  {tab.id === 'answer' && (
-                    <div className="prose prose-lg prose-saffron max-w-none">
-                      <ReactMarkdown>{result.answer}</ReactMarkdown>
-                    </div>
-                  )}
-                  {tab.id === 'analysis' && (
-                    <div className="prose prose-lg prose-saffron max-w-none">
-                      <ReactMarkdown>{result.analysis}</ReactMarkdown>
-                    </div>
-                  )}
+                  {/* Tab Content Rendered Below */
+                    tab.id === 'analysis' && (
+                      <div className="prose prose-saffron max-w-none sm:prose-lg">
+                        <ReactMarkdown>{result.analysis}</ReactMarkdown>
+                      </div>
+                    )}
                   {tab.id === 'guidance' && (
-                    <div className="prose prose-lg prose-saffron max-w-none">
+                    <div className="prose prose-saffron max-w-none sm:prose-lg">
                       <ReactMarkdown>{result.guidance}</ReactMarkdown>
                     </div>
                   )}
                   {tab.id === 'exercises' && (
-                    <div className="prose prose-lg prose-saffron max-w-none">
+                    <div className="prose prose-saffron max-w-none sm:prose-lg">
                       {result.exercises && result.exercises.trim() ? (
                         <ReactMarkdown>{result.exercises}</ReactMarkdown>
                       ) : (
@@ -376,7 +477,41 @@ function ResearchView() {
             })}
           </div>
         </div>
-      )}
+
+        {/* Mobile Bottom Navigation */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-starlight-200 pb-safe sm:hidden">
+          <div className="flex justify-around items-center h-[72px] px-1 pb-2">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              // Shorten labels for mobile
+              const mobileLabel = {
+                'Divine Guidance': 'Guidance',
+                'Deep Analysis': 'Analysis',
+                'Action Plan': 'Action',
+                'Practices': 'Practice',
+                'Verses': 'Verses'
+              }[tab.label] || tab.label;
+
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all active:scale-95 ${isActive ? 'text-nebula-600' : 'text-gray-400'
+                    }`}
+                >
+                  <div className={`p-1.5 rounded-2xl transition-all ${isActive ? 'bg-nebula-100/50' : 'bg-transparent'}`}>
+                    <Icon className={`w-6 h-6 ${isActive ? 'stroke-nebula-600' : ''}`} strokeWidth={isActive ? 2 : 1.5} />
+                  </div>
+                  <span className="text-[10px] font-medium tracking-tight leading-none">
+                    {mobileLabel}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </>)}
     </div>
   );
 }
